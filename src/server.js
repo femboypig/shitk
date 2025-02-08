@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const fetch = require('node-fetch');
 
 // Initialize express app
 const app = express();
@@ -8,7 +9,7 @@ const port = 3000;
 
 // CORS middleware configuration
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://id.vk.com'],
+    origin: ['http://localhost:3000', 'https://id.vk.com', 'https://shitk-p.vercel.app'],
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -24,6 +25,31 @@ app.use((err, req, res, next) => {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Функция для получения данных пользователя через VK API
+async function fetchVKUserData(access_token, user_id) {
+    try {
+        const response = await fetch(`https://api.vk.com/method/users.get?user_ids=${user_id}&fields=photo_200,email&access_token=${access_token}&v=5.131`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error.error_msg);
+        }
+
+        const user = data.response[0];
+        return {
+            vk_id: user.id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            photo_url: user.photo_200,
+            email: user.email,
+            access_token
+        };
+    } catch (error) {
+        console.error('VK API Error:', error);
+        throw error;
+    }
+}
+
 // Routes
 app.get('/', (req, res) => {
     try {
@@ -34,16 +60,22 @@ app.get('/', (req, res) => {
     }
 });
 
-app.post('/auth/vk/login', (req, res) => {
+app.post('/auth/vk/login', async (req, res) => {
     try {
-        const userData = req.body;
-        if (!userData || !userData.user_id) {
+        const { access_token, user_id } = req.body;
+        
+        if (!access_token || !user_id) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid user data'
+                message: 'Missing access_token or user_id'
             });
         }
-        console.log('Received VK user data:', userData);
+
+        // Получаем данные пользователя через VK API
+        const userData = await fetchVKUserData(access_token, user_id);
+        
+        console.log('Processed VK user data:', userData);
+        
         res.json({
             success: true,
             message: 'Authentication successful',
@@ -53,7 +85,7 @@ app.post('/auth/vk/login', (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message || 'Failed to authenticate'
         });
     }
 });
