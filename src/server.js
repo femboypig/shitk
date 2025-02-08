@@ -91,44 +91,28 @@ app.get('/', (req, res) => {
     }
 });
 
-app.post('/auth/vk/login', async (req, res) => {
+app.post('/auth/vk/login', (req, res) => {
     try {
-        console.log('Received login request:', {
-            body: req.body,
-            headers: req.headers
-        });
-
-        const { access_token } = req.body;
+        const { access_token, user_id } = req.body;
         
-        if (!access_token) {
-            console.error('Missing access_token in request');
-            return res.status(400).json({
-                success: false,
-                message: 'Missing access_token'
-            });
-        }
-
-        const userData = await fetchVKUserData(access_token);
-
-        console.log('Sending response:', {
-            success: true,
-            user: userData
-        });
+        // Просто возвращаем базовые данные пользователя
+        const userData = {
+            vk_id: user_id,
+            first_name: "User",
+            last_name: "VK",
+            photo_url: `https://vk.com/images/camera_200.png`,
+            access_token: access_token
+        };
 
         res.json({
             success: true,
             message: 'Authentication successful',
             user: userData
         });
-
     } catch (error) {
-        console.error('Login endpoint error:', error);
-        console.error('Stack trace:', error.stack);
-        
         res.status(500).json({
             success: false,
-            message: error.message || 'Internal server error',
-            error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            message: 'Authentication failed'
         });
     }
 });

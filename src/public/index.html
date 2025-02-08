@@ -59,52 +59,39 @@
                     });
                     function vkidOnSuccess(data) {
                         console.log('Raw VK data received:', data);
-    try {
-        // Декодируем id_token для получения базовой информации
-        const tokenParts = data.id_token.split('.');
-        const tokenPayload = JSON.parse(atob(tokenParts[1]));
-        
-        // Отправляем на сервер только необходимые данные
-        fetch('/auth/vk/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                access_token: data.access_token,
-                user_id: data.user_id
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(result => {
-            if (result.success && result.user) {
-                // Сохраняем полученные от сервера данные
-                localStorage.setItem('vk_user', JSON.stringify(result.user));
-                window.location.href = '/dashboard';
-            } else {
-                throw new Error(result.message || 'Failed to get user data');
-            }
-        })
-        .catch(error => {
-            console.error('Server error:', error);
-            alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
-        });
-    } catch (error) {
-        console.error('Error in success handler:', error);
-        alert('Произошла ошибка при обработке данных входа.');
-    }
-}
+                        
+                        const userData = {
+                            access_token: data.access_token,
+                            user_id: data.user_id
+                        };
 
-function vkidOnError(error) {
-    console.error('VK ID Error details:', error);
-    // Показываем более подробную ошибку
-    alert(`Ошибка входа: ${error.message || 'Неизвестная ошибка'}`);
-}
+                        fetch('/auth/vk/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(userData)
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                localStorage.setItem('vk_user', JSON.stringify(result.user));
+                                window.location.href = '/dashboard';
+                            } else {
+                                throw new Error(result.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Server error:', error);
+                            alert('Ошибка входа. Попробуйте позже.');
+                        });
+                    }
+
+                    function vkidOnError(error) {
+                        console.error('VK ID Error details:', error);
+                        // Показываем более подробную ошибку
+                        alert(`Ошибка входа: ${error.message || 'Неизвестная ошибка'}`);
+                    }
                   }
                 </script>
               </div>
