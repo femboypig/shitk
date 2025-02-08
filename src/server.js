@@ -34,15 +34,50 @@ app.get('/', (req, res) => {
     }
 });
 
+app.post('/auth/vk/login', (req, res) => {
+    try {
+        const userData = req.body;
+        console.log('Received VK user data:', userData);
+
+        // Здесь можно добавить логику создания сессии
+        // Например, сохранение в базу данных или создание JWT токена
+
+        res.json({
+            success: true,
+            message: 'Authentication successful',
+            user: userData
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Authentication failed',
+            error: error.message
+        });
+    }
+});
+
 app.get('/auth/vk/callback', (req, res) => {
     try {
         const code = req.query.code;
-        console.log('Received code:', code);
-        res.send('Authentication successful!');
+        console.log('Received authorization code:', code);
+        
+        // Здесь можно добавить обмен кода на токен
+        // и получение данных пользователя
+
+        res.redirect('/dashboard');
     } catch (error) {
-        console.error('Auth callback error:', error);
-        res.status(500).send('Authentication error');
+        console.error('Callback error:', error);
+        res.redirect('/error');
     }
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/error', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'error.html'));
 });
 
 // Start server with error handling

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Добро пожаловать!</h1>
+        <div id="user-info">
+            Загрузка данных пользователя...
+        </div>
+        <script>
+            // Получаем данные пользователя из localStorage
+            const userData = JSON.parse(localStorage.getItem('vk_user'));
+            if (userData) {
+                document.getElementById('user-info').innerHTML = `
+                    <p>ID: ${userData.user_id}</p>
+                    <p>Email: ${userData.email}</p>
+                `;
+            }
+        </script>
+    </div>
+</body>
+</html> 

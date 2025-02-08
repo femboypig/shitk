@@ -42,17 +42,49 @@
                         .catch(vkidOnError);
                     });
                     function vkidOnSuccess(data) {
-    console.log('Success:', data);
-    // Сохраняем данные пользователя
-    localStorage.setItem('vk_user', JSON.stringify(data));
-    // Перенаправляем на главную страницу или дашборд
-    window.location.href = '/';
+    console.log('Success data received:', data);
+    try {
+        // Сохраняем данные пользователя
+        localStorage.setItem('vk_user', JSON.stringify(data));
+        console.log('Data saved to localStorage');
+        
+        // Получаем токен или другие важные данные
+        const { token, user_id } = data;
+        console.log('Token:', token);
+        console.log('User ID:', user_id);
+        
+        // Делаем запрос к серверу для создания сессии
+        fetch('/auth/vk/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Server response:', result);
+            if (result.success) {
+                // Перенаправляем только после успешного ответа сервера
+                window.location.href = '/dashboard';
+            } else {
+                throw new Error('Server authentication failed');
+            }
+        })
+        .catch(error => {
+            console.error('Server error:', error);
+            alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
+        });
+    } catch (error) {
+        console.error('Error in success handler:', error);
+        alert('Произошла ошибка при обработке данных входа.');
+    }
 }
 
 function vkidOnError(error) {
-    console.error('VK ID Error:', error);
-    // Показываем ошибку пользователю
-    alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
+    console.error('VK ID Error details:', error);
+    // Показываем более подробную ошибку
+    alert(`Ошибка входа: ${error.message || 'Неизвестная ошибка'}`);
 }
                   }
                 </script>
