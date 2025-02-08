@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход или регистрация</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Вход или регистрация</h1>
+        
+        <div class="login-buttons">
+            <!-- VK ID button container -->
+            <div>
+                <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+                <script type="text/javascript">
+                  if ('VKIDSDK' in window) {
+                    const VKID = window.VKIDSDK;
+              
+                    VKID.Config.init({
+                      app: 53025022,
+                      redirectUrl: 'http://localhost',
+                      responseMode: VKID.ConfigResponseMode.Callback,
+                      source: VKID.ConfigSource.LOWCODE,
+                      scope: '', // Заполните нужными доступами по необходимости
+                    });
+              
+                    const oneTap = new VKID.OneTap();
+              
+                    oneTap.render({
+                      container: document.currentScript.parentElement,
+                      showAlternativeLogin: true
+                    })
+                    .on(VKID.WidgetEvents.ERROR, vkidOnError)
+                    .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function (payload) {
+                      const code = payload.code;
+                      const deviceId = payload.device_id;
+              
+                      VKID.Auth.exchangeCode(code, deviceId)
+                        .then(vkidOnSuccess)
+                        .catch(vkidOnError);
+                    });
+                  
+                    function vkidOnSuccess(data) {
+                      // Обработка полученного результата
+                    }
+                  
+                    function vkidOnError(error) {
+                      // Обработка ошибки
+                    }
+                  }
+                </script>
+              </div>
+            
+            <button class="google-button">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.171 8.368h-.67v-.035H10v3.333h4.709A4.998 4.998 0 0 1 5 10a5 5 0 0 1 5-5c1.275 0 2.434.48 3.317 1.266l2.357-2.357A8.295 8.295 0 0 0 10 2C5.582 2 2 5.582 2 10s3.582 8 8 8c4.418 0 8-3.582 8-8 0-.553-.057-1.093-.166-1.613z" fill="#fff"/>
+                </svg>
+                Войти через Google
+            </button>
+            
+            <div class="email-input">
+                <input type="email" placeholder="Адрес электронной почты" />
+                <button class="code-button">Получить код</button>
+            </div>
+        </div>
+
+        <div class="terms">
+            Продолжая регистрацию или вход, вы принимаете условия 
+            <a href="/terms">Пользовательского соглашения</a> и 
+            <a href="/privacy">Политики конфиденциальности</a>
+        </div>
+    </div>
+</body>
+</html> 
