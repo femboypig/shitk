@@ -3,25 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дашборд</title>
+    <title>Игровой профиль</title>
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Добро пожаловать!</h1>
-        <div id="user-info">
-            Загрузка данных пользователя...
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img src="https://vk.com/images/camera_200.png" id="profile-image" alt="Аватар">
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="profile-name">Загрузка...</h2>
+                        <span class="profile-id" id="profile-id"></span>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="stat-value">42</span>
+                        <span class="stat-label">Уровень</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">1337</span>
+                        <span class="stat-label">Очки</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">7</span>
+                        <span class="stat-label">Ранг</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="active">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
+                    </svg>
+                    Обзор
+                </a>
+                <a href="#">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="currentColor"/>
+                    </svg>
+                    Инвентарь
+                </a>
+                <a href="#">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+                    </svg>
+                    Достижения
+                </a>
+            </nav>
         </div>
-        <script>
-            // Получаем данные пользователя из localStorage
-            const userData = JSON.parse(localStorage.getItem('vk_user'));
-            if (userData) {
-                document.getElementById('user-info').innerHTML = `
-                    <p>ID: ${userData.user_id}</p>
-                    <p>Email: ${userData.email}</p>
-                `;
-            }
-        </script>
+        
+        <main class="main-content">
+            <div class="content-header">
+                <h1>Обзор профиля</h1>
+                <button class="logout-button" onclick="logout()">Выйти</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Последняя активность</h3>
+                    <p>Победа в турнире</p>
+                    <span class="timestamp">2 часа назад</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Следующая награда</h3>
+                    <p>До следующего уровня:</p>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>Достижения</h3>
+                    <p>15/20 выполнено</p>
+                    <div class="achievements">
+                        <span class="achievement">🏆</span>
+                        <span class="achievement">⭐</span>
+                        <span class="achievement">🎮</span>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
+
+    <script>
+        // Получаем данные пользователя из localStorage
+        const userData = JSON.parse(localStorage.getItem('vk_user'));
+        if (userData) {
+            document.getElementById('profile-id').textContent = `ID: ${userData.user_id}`;
+            document.getElementById('profile-name').textContent = userData.first_name || 'Игрок';
+        }
+
+        function logout() {
+            localStorage.removeItem('vk_user');
+            window.location.href = '/';
+        }
+    </script>
 </body>
-</html> 
+</html>
