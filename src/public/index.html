@@ -60,27 +60,11 @@
                     function vkidOnSuccess(data) {
                         console.log('Raw VK data received:', data);
     try {
-        // Декодируем id_token чтобы получить информацию о пользователе
+        // Декодируем id_token для получения базовой информации
         const tokenParts = data.id_token.split('.');
         const tokenPayload = JSON.parse(atob(tokenParts[1]));
         
-        // Формируем данные пользователя
-        const userData = {
-            vk_id: data.user_id,
-            access_token: data.access_token,
-            // Добавим временные значения, которые потом нужно будет получить через VK API
-            first_name: "Пользователь",
-            last_name: "VK",
-            email: `id${data.user_id}@vk.com`,
-            photo_url: `https://vk.com/id${data.user_id}`,
-        };
-
-        console.log('Formatted user data:', userData);
-
-        // Сохраняем данные
-        localStorage.setItem('vk_user', JSON.stringify(userData));
-
-        // Отправляем на сервер
+        // Отправляем на сервер только необходимые данные
         fetch('/auth/vk/login', {
             method: 'POST',
             headers: {
@@ -88,8 +72,7 @@
             },
             body: JSON.stringify({
                 access_token: data.access_token,
-                user_id: data.user_id,
-                scope: data.scope
+                user_id: data.user_id
             })
         })
         .then(response => {
@@ -99,20 +82,16 @@
             return response.json();
         })
         .then(result => {
-            console.log('Server response:', result);
-            if (result.success) {
-                // Обновляем данные пользователя если сервер вернул дополнительную информацию
-                if (result.user) {
-                    localStorage.setItem('vk_user', JSON.stringify(result.user));
-                }
+            if (result.success && result.user) {
+                // Сохраняем полученные от сервера данные
+                localStorage.setItem('vk_user', JSON.stringify(result.user));
                 window.location.href = '/dashboard';
             } else {
-                throw new Error(result.message || 'Server authentication failed');
+                throw new Error(result.message || 'Failed to get user data');
             }
         })
         .catch(error => {
             console.error('Server error:', error);
-            localStorage.removeItem('vk_user');
             alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
         });
     } catch (error) {

@@ -5,7 +5,7 @@ const axios = require('axios');
 
 // Initialize express app
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // CORS middleware configuration
 app.use(cors({
@@ -28,14 +28,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Функция для получения данных пользователя через VK API
 async function fetchVKUserData(access_token) {
     try {
-        // Используем сервисный токен доступа VK API
         const response = await axios.get('https://api.vk.com/method/users.get', {
             params: {
                 access_token: access_token,
-                fields: 'photo_200,email,first_name,last_name',
+                fields: 'photo_200',
                 v: '5.131'
             }
         });
+
+        console.log('VK API Response:', response.data); // Для отладки
 
         if (response.data.error) {
             throw new Error(response.data.error.error_msg);
@@ -44,15 +45,14 @@ async function fetchVKUserData(access_token) {
         const user = response.data.response[0];
         return {
             vk_id: user.id,
-            first_name: user.first_name,
-            last_name: user.last_name,
+            first_name: user.first_name || 'Пользователь',
+            last_name: user.last_name || 'VK',
             photo_url: user.photo_200 || `https://vk.com/images/camera_200.png`,
-            email: user.email,
             access_token
         };
     } catch (error) {
         console.error('VK API Error:', error.response?.data || error.message);
-        throw error;
+        throw new Error('Failed to fetch user data from VK API');
     }
 }
 
@@ -77,8 +77,10 @@ app.post('/auth/vk/login', async (req, res) => {
             });
         }
 
+        console.log('Received access_token:', access_token); // Для отладки
+
         const userData = await fetchVKUserData(access_token);
-        console.log('VK user data:', userData);
+        console.log('Processed user data:', userData); // Для отладки
 
         res.json({
             success: true,
@@ -122,7 +124,7 @@ app.get('/chat', (req, res) => {
 
 // Start server with error handling
 const server = app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
 }).on('error', (error) => {
     console.error('Server failed to start:', error);
 });
