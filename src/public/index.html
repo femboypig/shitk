@@ -58,9 +58,20 @@
                         .catch(vkidOnError);
                     });
                     function vkidOnSuccess(data) {
+                        console.log('Raw VK data received:', data);
     try {
-        // Сохраняем данные пользователя
-        localStorage.setItem('vk_user', JSON.stringify(data));
+        // Форматируем данные пользователя
+        const userData = {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            photo_url: data.avatar_url || data.photo_url,
+            vk_id: data.id,
+            access_token: data.access_token
+        };
+
+        // Сохраняем отформатированные данные
+        localStorage.setItem('vk_user', JSON.stringify(userData));
 
         // Отправляем данные на сервер
         fetch('/auth/vk/login', {
@@ -68,7 +79,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(userData)
         })
         .then(response => response.json())
         .then(result => {
@@ -80,11 +91,12 @@
         })
         .catch(error => {
             console.error('Server error:', error);
-            localStorage.removeItem('vk_user'); // Очищаем данные при ошибке
+            localStorage.removeItem('vk_user');
             alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
         });
     } catch (error) {
         console.error('Error in success handler:', error);
+        console.log('Raw VK data:', data); // Для отладки
         alert('Произошла ошибка при обработке данных входа.');
     }
 }
