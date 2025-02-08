@@ -35,13 +35,16 @@ app.get('/', (req, res) => {
     }
 });
 
-async function getVKUserInfo(access_token, user_id) {
+// Конфигурация приложения VK
+const VK_SERVICE_TOKEN = '2323667e2323667e2323667e05200a7e80223232323667e44869a1dfe5d269c4c270c9e'; // Замените на ваш сервисный ключ
+
+async function getVKUserInfo(user_id) {
     try {
         const response = await axios.get('https://api.vk.com/method/users.get', {
             params: {
                 user_ids: user_id,
                 fields: 'photo_200',
-                access_token: access_token,
+                access_token: VK_SERVICE_TOKEN, // Используем сервисный токен
                 v: '5.131'
             }
         });
@@ -65,13 +68,13 @@ async function getVKUserInfo(access_token, user_id) {
 
 app.post('/auth/vk/login', async (req, res) => {
     try {
-        const { access_token, user_id } = req.body;
+        const { user_id } = req.body;
         
-        if (!access_token || !user_id) {
-            throw new Error('Missing required data');
+        if (!user_id) {
+            throw new Error('Missing user_id');
         }
 
-        const userData = await getVKUserInfo(access_token, user_id);
+        const userData = await getVKUserInfo(user_id);
         console.log('User data:', userData);
 
         res.json({
