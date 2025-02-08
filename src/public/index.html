@@ -41,14 +41,19 @@
                         .then(vkidOnSuccess)
                         .catch(vkidOnError);
                     });
-                  
                     function vkidOnSuccess(data) {
-                      // Обработка полученного результата
-                    }
-                  
-                    function vkidOnError(error) {
-                      // Обработка ошибки
-                    }
+    console.log('Success:', data);
+    // Сохраняем данные пользователя
+    localStorage.setItem('vk_user', JSON.stringify(data));
+    // Перенаправляем на главную страницу или дашборд
+    window.location.href = '/';
+}
+
+function vkidOnError(error) {
+    console.error('VK ID Error:', error);
+    // Показываем ошибку пользователю
+    alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
+}
                   }
                 </script>
               </div>
