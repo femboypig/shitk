@@ -60,17 +60,15 @@
                     function vkidOnSuccess(data) {
                         console.log('Raw VK data received:', data);
                         
-                        const userData = {
-                            access_token: data.access_token,
-                            id_token: data.id_token
-                        };
-
                         fetch('/auth/vk/login', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify(userData)
+                            body: JSON.stringify({
+                                id_token: data.id_token,
+                                user_id: data.user_id
+                            })
                         })
                         .then(response => response.json())
                         .then(result => {

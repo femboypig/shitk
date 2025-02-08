@@ -34,16 +34,43 @@ app.get('/', (req, res) => {
     }
 });
 
+// Функция для декодирования JWT токена
+function decodeJWT(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error('JWT decode error:', error);
+        return null;
+    }
+}
+
 app.post('/auth/vk/login', (req, res) => {
     try {
-        const { user_id } = req.body;
+        const { id_token, user_id } = req.body;
         
-        // Формируем данные пользователя из полученного user_id
+        if (!id_token || !user_id) {
+            throw new Error('Missing required data');
+        }
+
+        const decodedToken = decodeJWT(id_token);
+        console.log('Decoded token:', decodedToken);
+
+        // Проверяем, что ID пользователя совпадает
+        if (decodedToken.sub !== user_id) {
+            throw new Error('User ID mismatch');
+        }
+
         const userData = {
             vk_id: user_id,
-            first_name: "VK",
-            last_name: "User",
-            photo_url: `https://vk.com/id${user_id}`,
+            first_name: decodedToken.first_name || decodedToken.given_name || "VK",
+            last_name: decodedToken.last_name || decodedToken.family_name || "User",
+            photo_url: decodedToken.picture || `https://vk.com/id${user_id}`,
         };
 
         console.log('User data:', userData);
