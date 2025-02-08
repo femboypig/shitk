@@ -25,34 +25,59 @@ app.use((err, req, res, next) => {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Добавляем обработку ошибок для promises
+process.on('unhandledRejection', (error) => {
+    console.error('Unhandled Rejection:', error);
+});
+
 // Функция для получения данных пользователя через VK API
 async function fetchVKUserData(access_token) {
     try {
-        const response = await axios.get('https://api.vk.com/method/users.get', {
+        console.log('Fetching VK user data with token:', access_token.substring(0, 20) + '...');
+        
+        const response = await axios({
+            method: 'get',
+            url: 'https://api.vk.com/method/users.get',
             params: {
                 access_token: access_token,
                 fields: 'photo_200',
                 v: '5.131'
-            }
+            },
+            validateStatus: false // Чтобы axios не выбрасывал ошибку для не-200 статусов
         });
 
-        console.log('VK API Response:', response.data); // Для отладки
+        console.log('VK API Raw Response:', JSON.stringify(response.data, null, 2));
 
         if (response.data.error) {
-            throw new Error(response.data.error.error_msg);
+            console.error('VK API Error:', response.data.error);
+            throw new Error(response.data.error.error_msg || 'VK API Error');
+        }
+
+        if (!response.data.response || !response.data.response[0]) {
+            console.error('Invalid VK API Response:', response.data);
+            throw new Error('Invalid response from VK API');
         }
 
         const user = response.data.response[0];
-        return {
+        const userData = {
             vk_id: user.id,
             first_name: user.first_name || 'Пользователь',
             last_name: user.last_name || 'VK',
             photo_url: user.photo_200 || `https://vk.com/images/camera_200.png`,
-            access_token
+            access_token: access_token
         };
+
+        console.log('Processed user data:', JSON.stringify(userData, null, 2));
+        return userData;
+
     } catch (error) {
-        console.error('VK API Error:', error.response?.data || error.message);
-        throw new Error('Failed to fetch user data from VK API');
+        console.error('Error in fetchVKUserData:', error);
+        console.error('Error details:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
+        throw new Error(`Failed to fetch user data: ${error.message}`);
     }
 }
 
@@ -68,30 +93,42 @@ app.get('/', (req, res) => {
 
 app.post('/auth/vk/login', async (req, res) => {
     try {
+        console.log('Received login request:', {
+            body: req.body,
+            headers: req.headers
+        });
+
         const { access_token } = req.body;
         
         if (!access_token) {
+            console.error('Missing access_token in request');
             return res.status(400).json({
                 success: false,
                 message: 'Missing access_token'
             });
         }
 
-        console.log('Received access_token:', access_token); // Для отладки
-
         const userData = await fetchVKUserData(access_token);
-        console.log('Processed user data:', userData); // Для отладки
+
+        console.log('Sending response:', {
+            success: true,
+            user: userData
+        });
 
         res.json({
             success: true,
             message: 'Authentication successful',
             user: userData
         });
+
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('Login endpoint error:', error);
+        console.error('Stack trace:', error.stack);
+        
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to authenticate'
+            message: error.message || 'Internal server error',
+            error: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
@@ -132,8 +169,4 @@ const server = app.listen(port, () => {
 // Handle process errors
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
-});
-
-process.on('unhandledRejection', (error) => {
-    console.error('Unhandled Rejection:', error);
 }); 
