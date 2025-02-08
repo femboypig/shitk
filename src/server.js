@@ -30,54 +30,31 @@ process.on('unhandledRejection', (error) => {
     console.error('Unhandled Rejection:', error);
 });
 
-// Функция для получения данных пользователя через VK API
-async function fetchVKUserData(access_token) {
+// Функция для получения данных пользователя из VK API
+async function getVKUserData(access_token) {
     try {
-        console.log('Fetching VK user data with token:', access_token.substring(0, 20) + '...');
-        
-        const response = await axios({
-            method: 'get',
-            url: 'https://api.vk.com/method/users.get',
+        const response = await axios.get('https://api.vk.com/method/users.get', {
             params: {
                 access_token: access_token,
                 fields: 'photo_200',
                 v: '5.131'
-            },
-            validateStatus: false // Чтобы axios не выбрасывал ошибку для не-200 статусов
+            }
         });
 
-        console.log('VK API Raw Response:', JSON.stringify(response.data, null, 2));
-
         if (response.data.error) {
-            console.error('VK API Error:', response.data.error);
-            throw new Error(response.data.error.error_msg || 'VK API Error');
-        }
-
-        if (!response.data.response || !response.data.response[0]) {
-            console.error('Invalid VK API Response:', response.data);
-            throw new Error('Invalid response from VK API');
+            throw new Error(response.data.error.error_msg);
         }
 
         const user = response.data.response[0];
-        const userData = {
+        return {
             vk_id: user.id,
-            first_name: user.first_name || 'Пользователь',
-            last_name: user.last_name || 'VK',
+            first_name: user.first_name,
+            last_name: user.last_name,
             photo_url: user.photo_200 || `https://vk.com/images/camera_200.png`,
-            access_token: access_token
         };
-
-        console.log('Processed user data:', JSON.stringify(userData, null, 2));
-        return userData;
-
     } catch (error) {
-        console.error('Error in fetchVKUserData:', error);
-        console.error('Error details:', {
-            message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
-        });
-        throw new Error(`Failed to fetch user data: ${error.message}`);
+        console.error('VK API Error:', error);
+        throw error;
     }
 }
 
@@ -91,18 +68,18 @@ app.get('/', (req, res) => {
     }
 });
 
-app.post('/auth/vk/login', (req, res) => {
+app.post('/auth/vk/login', async (req, res) => {
     try {
-        const { access_token, user_id } = req.body;
+        const { access_token } = req.body;
+        console.log('Received access token:', access_token);
+
+        // Получаем реальные данные из VK API
+        const userData = await getVKUserData(access_token);
         
-        // Просто возвращаем базовые данные пользователя
-        const userData = {
-            vk_id: user_id,
-            first_name: "User",
-            last_name: "VK",
-            photo_url: `https://vk.com/images/camera_200.png`,
-            access_token: access_token
-        };
+        // Добавляем токен к данным пользователя
+        userData.access_token = access_token;
+
+        console.log('User data from VK:', userData);
 
         res.json({
             success: true,
@@ -110,9 +87,10 @@ app.post('/auth/vk/login', (req, res) => {
             user: userData
         });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'Authentication failed'
+            message: 'Authentication failed: ' + error.message
         });
     }
 });
