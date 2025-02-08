@@ -3,104 +3,728 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игровой профиль</title>
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/dashboard.css">
+    <title>Профиль | VK Mini App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --background: #0F0F0F;
+            --surface: #141414;
+            --surface-hover: #222222;
+            --accent: #0077FF;
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.48);
+            --separator: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Сайдбар в стиле Telegram */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: var(--surface);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--separator);
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 64px;
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .sidebar-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .sidebar-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .sidebar-nav {
+            padding: 8px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            gap: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-nav-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .sidebar-nav-item.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .sidebar-nav-item.active .sidebar-nav-icon {
+            color: white;
+        }
+
+        /* Основной контент */
+        .content {
+            flex: 1;
+            padding: 16px;
+            margin-left: 280px;
+            padding-bottom: 56px;
+        }
+
+        /* Финальные правки навбара */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--surface);
+            z-index: 1000;
+            border-top: 0.5px solid var(--separator);
+        }
+
+        .mobile-nav-items {
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            width: 100%;
+        }
+
+        .mobile-nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 510;
+            gap: 5px;
+            flex-direction: column;
+            transition: all 0.15s ease;
+            height: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .mobile-nav-item:active {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .mobile-nav-icon {
+            width: 26px;
+            height: 26px;
+            stroke-width: 1.7px;
+        }
+
+        .mobile-nav-counter {
+            position: absolute;
+            top: 4px;
+            right: calc(50% - 18px);
+            background: #FF3B30;
+            min-width: 19px;
+            height: 19px;
+            border-radius: 10px;
+            padding: 0 5px;
+            font-size: 12px;
+            font-weight: 590;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1023px) {
+            .sidebar {
+                display: none;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .mobile-nav {
+                display: block;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-nav {
+                display: none;
+            }
+        }
+
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .mobile-nav {
+                height: calc(56px + env(safe-area-inset-bottom));
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            .content {
+                padding-bottom: calc(56px + env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Профиль */
+        .profile {
+            width: 100%;
+            max-width: 100%;
+            padding: 24px;
+        }
+
+        .profile-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left h1 {
+            font-size: 21px;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 0;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--surface);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-button:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+        }
+
+        .header-button svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 1.5px;
+        }
+
+        .profile-section {
+            background: var(--surface);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            padding: 20px;
+        }
+
+        .section-header {
+            margin-bottom: 16px;
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 12px 0;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 16px;
+            border: 1px solid var(--separator);
+        }
+
+        .change-photo {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            gap: 16px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+        }
+
+        .menu-item-content {
+            flex: 1;
+        }
+
+        .menu-item-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .menu-item-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .menu-item-sublabel {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .email-icon {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .vk-icon {
+            background: #0077FF;
+            color: white;
+        }
+
+        .logout {
+            color: #FF3B30;
+            border: none;
+            background: none;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-switch label {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 12px;
+        }
+
+        .toggle-switch label:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + label {
+            background-color: var(--accent);
+        }
+
+        .toggle-switch input:checked + label:before {
+            transform: translateX(20px);
+        }
+
+        /* Обновленная адаптивность */
+        @media (max-width: 768px) {
+            .profile {
+                padding: 0;
+            }
+            
+            .header-content {
+                padding: 12px 16px;
+            }
+            
+            .header-left h1 {
+                font-size: 19px;
+            }
+            
+            .header-button {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .header-button svg {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .profile-section {
+                border-radius: 0;
+                margin-bottom: 12px;
+                padding: 16px;
+            }
+            
+            .section-header h2 {
+                font-size: 17px;
+            }
+            
+            .profile-info {
+                padding: 8px 0;
+                margin-bottom: 16px;
+            }
+            
+            .profile-avatar {
+                width: 96px;
+                height: 96px;
+                margin-bottom: 12px;
+            }
+            
+            .menu-item {
+                padding: 12px;
+            }
+            
+            .menu-item-icon {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .menu-item-label {
+                font-size: 13px;
+            }
+            
+            .menu-item-value {
+                font-size: 14px;
+            }
+            
+            .menu-item-sublabel {
+                font-size: 12px;
+            }
+            
+            .toggle-switch {
+                width: 40px;
+                height: 22px;
+            }
+            
+            .toggle-switch label:before {
+                height: 18px;
+                width: 18px;
+            }
+            
+            .toggle-switch input:checked + label:before {
+                transform: translateX(18px);
+            }
+        }
+
+        /* Дополнительные улучшения для iPhone */
+        @supports (padding: env(safe-area-inset-top)) {
+            .profile-header {
+                padding-top: env(safe-area-inset-top);
+            }
+            
+            .header-content {
+                padding-top: max(16px, env(safe-area-inset-top));
+            }
+            
+            @media (max-width: 768px) {
+                .header-content {
+                    padding-top: max(12px, env(safe-area-inset-top));
+                }
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="sidebar">
-            <div class="profile-card">
-                <div class="profile-header">
-                    <div class="profile-avatar">
-                        <img src="https://vk.com/images/camera_200.png" id="profile-image" alt="Аватар">
-                    </div>
-                    <div class="profile-info">
-                        <h2 id="profile-name">Загрузка...</h2>
-                        <span class="profile-id" id="profile-id"></span>
-                    </div>
-                </div>
-                <div class="profile-stats">
-                    <div class="stat">
-                        <span class="stat-value">42</span>
-                        <span class="stat-label">Уровень</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value">1337</span>
-                        <span class="stat-label">Очки</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value">7</span>
-                        <span class="stat-label">Ранг</span>
-                    </div>
-                </div>
+    <div class="app">
+        <!-- Сайдбар -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="" alt="" class="sidebar-avatar" id="sidebarAvatar">
+                <div class="sidebar-name" id="sidebarName">Загрузка...</div>
             </div>
             <nav class="sidebar-nav">
-                <a href="#" class="active">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
+                <a href="/chat" class="sidebar-nav-item">
+                    <svg class="sidebar-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
-                    Обзор
+                    Чат
                 </a>
-                <a href="#">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="currentColor"/>
+                <a href="/dashboard" class="sidebar-nav-item active">
+                    <svg class="sidebar-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
                     </svg>
-                    Инвентарь
-                </a>
-                <a href="#">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
-                    </svg>
-                    Достижения
+                    Профиль
                 </a>
             </nav>
-        </div>
-        
-        <main class="main-content">
-            <div class="content-header">
-                <h1>Обзор профиля</h1>
-                <button class="logout-button" onclick="logout()">Выйти</button>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Последняя активность</h3>
-                    <p>Победа в турнире</p>
-                    <span class="timestamp">2 часа назад</span>
-                </div>
-                <div class="stat-card">
-                    <h3>Следующая награда</h3>
-                    <p>До следующего уровня:</p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 75%"></div>
+        </aside>
+
+        <!-- Основной контент -->
+        <main class="content">
+            <div class="profile">
+                <div class="profile-header">
+                    <div class="header-content">
+                        <div class="header-left">
+                            <h1>Настройки</h1>
+                        </div>
+                        <div class="header-right">
+                            <button class="header-button">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Достижения</h3>
-                    <p>15/20 выполнено</p>
-                    <div class="achievements">
-                        <span class="achievement">🏆</span>
-                        <span class="achievement">⭐</span>
-                        <span class="achievement">🎮</span>
+
+                <div class="profile-section">
+                    <div class="profile-info">
+                        <img src="" alt="" class="profile-avatar" id="userAvatar">
+                        <a href="#" class="change-photo">Изменить фото</a>
+                    </div>
+
+                    <div class="menu-items">
+                        <div class="menu-item">
+                            <div class="menu-item-icon email-icon">@</div>
+                            <div class="menu-item-content">
+                                <div class="menu-item-label">Адрес электронной почты</div>
+                                <div class="menu-item-value" id="userEmail">Загрузка...</div>
+                            </div>
+                        </div>
+
+                        <div class="menu-item">
+                            <div class="menu-item-icon vk-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14c5.6 0 6.93-1.33 6.93-6.93V8.93C22 3.33 20.67 2 15.07 2z"/>
+                                </svg>
+                            </div>
+                            <div class="menu-item-content">
+                                <div class="menu-item-value">Вы вошли с VK ID</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2>Уведомления</h2>
+                    </div>
+                    <div class="menu-items">
+                        <div class="menu-item notifications">
+                            <div class="menu-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>
+                                </svg>
+                            </div>
+                            <div class="menu-item-content">
+                                <div class="menu-item-label">Новые сообщения</div>
+                                <div class="menu-item-sublabel">Получать уведомления о новых сообщениях</div>
+                            </div>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="notificationToggle" checked>
+                                <label for="notificationToggle"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2>Поддержка</h2>
+                    </div>
+                    <div class="menu-items">
+                        <a href="/support" class="menu-item">
+                            <div class="menu-item-icon support-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="menu-item-content">
+                                <div class="menu-item-value">Написать в поддержку</div>
+                            </div>
+                        </a>
+
+                        <button class="menu-item logout">
+                            <div class="menu-item-icon logout-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                                </svg>
+                            </div>
+                            <div class="menu-item-content">
+                                <div class="menu-item-value">Выйти из профиля</div>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- Обновленная мобильная навигация -->
+        <nav class="mobile-nav">
+            <div class="mobile-nav-items">
+                <a href="/chat" class="mobile-nav-item">
+                    <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Чат
+                    <span class="mobile-nav-counter">2</span>
+                </a>
+                <a href="/dashboard" class="mobile-nav-item active">
+                    <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                    </svg>
+                    Профиль
+                </a>
+            </div>
+        </nav>
     </div>
 
     <script>
         // Получаем данные пользователя из localStorage
-        const userData = JSON.parse(localStorage.getItem('vk_user'));
-        if (userData) {
-            document.getElementById('profile-id').textContent = `ID: ${userData.user_id}`;
-            document.getElementById('profile-name').textContent = userData.first_name || 'Игрок';
+        const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
+        
+        // Функция обновления UI
+        function updateUserInterface(data) {
+            // Обновляем аватары
+            const avatarElements = ['userAvatar', 'sidebarAvatar'];
+            avatarElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.src = data.photo_url || 'https://vk.com/images/camera_200.png';
+                }
+            });
+
+            // Обновляем имя пользователя
+            const nameElements = ['sidebarName'];
+            const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
+            nameElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = fullName || 'Гость';
+                }
+            });
+
+            // Обновляем email
+            const emailElement = document.getElementById('userEmail');
+            if (emailElement) {
+                emailElement.textContent = data.email || 'Не указан';
+            }
         }
 
-        function logout() {
+        // Проверяем есть ли данные в localStorage
+        if (Object.keys(userData).length > 0) {
+            updateUserInterface(userData);
+        } else {
+            // Если данных нет, пробуем получить их с сервера
+            fetch('/api/user')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem('vk_user', JSON.stringify(data.user));
+                        updateUserInterface(data.user);
+                    } else {
+                        window.location.href = '/'; // Редирект на страницу входа
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                    window.location.href = '/'; // Редирект на страницу входа
+                });
+        }
+
+        // Обработчик выхода
+        document.querySelector('.logout').addEventListener('click', () => {
             localStorage.removeItem('vk_user');
             window.location.href = '/';
-        }
+        });
     </script>
 </body>
 </html>

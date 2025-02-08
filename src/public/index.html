@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход или регистрация</title>
     <link rel="stylesheet" href="/styles.css">
+    <script>
+        // Проверяем авторизацию при загрузке страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            const userData = localStorage.getItem('vk_user');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    // Если есть данные пользователя, редиректим на профиль
+                    window.location.href = '/dashboard';
+                } catch (error) {
+                    // Если данные повреждены, очищаем их
+                    localStorage.removeItem('vk_user');
+                }
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -42,18 +58,11 @@
                         .catch(vkidOnError);
                     });
                     function vkidOnSuccess(data) {
-    console.log('Success data received:', data);
     try {
         // Сохраняем данные пользователя
         localStorage.setItem('vk_user', JSON.stringify(data));
-        console.log('Data saved to localStorage');
-        
-        // Получаем токен или другие важные данные
-        const { token, user_id } = data;
-        console.log('Token:', token);
-        console.log('User ID:', user_id);
-        
-        // Делаем запрос к серверу для создания сессии
+
+        // Отправляем данные на сервер
         fetch('/auth/vk/login', {
             method: 'POST',
             headers: {
@@ -63,9 +72,7 @@
         })
         .then(response => response.json())
         .then(result => {
-            console.log('Server response:', result);
             if (result.success) {
-                // Перенаправляем только после успешного ответа сервера
                 window.location.href = '/dashboard';
             } else {
                 throw new Error('Server authentication failed');
@@ -73,6 +80,7 @@
         })
         .catch(error => {
             console.error('Server error:', error);
+            localStorage.removeItem('vk_user'); // Очищаем данные при ошибке
             alert('Произошла ошибка при входе. Пожалуйста, попробуйте снова.');
         });
     } catch (error) {

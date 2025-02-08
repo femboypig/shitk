@@ -37,11 +37,13 @@ app.get('/', (req, res) => {
 app.post('/auth/vk/login', (req, res) => {
     try {
         const userData = req.body;
+        if (!userData || !userData.user_id) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid user data'
+            });
+        }
         console.log('Received VK user data:', userData);
-
-        // Здесь можно добавить логику создания сессии
-        // Например, сохранение в базу данных или создание JWT токена
-
         res.json({
             success: true,
             message: 'Authentication successful',
@@ -51,8 +53,7 @@ app.post('/auth/vk/login', (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'Authentication failed',
-            error: error.message
+            message: error.message
         });
     }
 });
@@ -61,14 +62,13 @@ app.get('/auth/vk/callback', (req, res) => {
     try {
         const code = req.query.code;
         console.log('Received authorization code:', code);
-        
-        // Здесь можно добавить обмен кода на токен
-        // и получение данных пользователя
-
+        if (!code) {
+            return res.redirect('/error?error=' + encodeURIComponent('Не получен код авторизации от VK'));
+        }
         res.redirect('/dashboard');
     } catch (error) {
         console.error('Callback error:', error);
-        res.redirect('/error');
+        res.redirect('/error?error=' + encodeURIComponent(error.message));
     }
 });
 
@@ -78,6 +78,10 @@ app.get('/dashboard', (req, res) => {
 
 app.get('/error', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'error.html'));
+});
+
+app.get('/chat', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
 
 // Start server with error handling

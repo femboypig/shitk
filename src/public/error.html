@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка | Игровой профиль</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .error-container {
+            text-align: center;
+            max-width: 480px;
+            padding: 40px 24px;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .error-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #FF3B30;
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .back-button {
+            background: #0077FF;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background: #0066dd;
+            transform: translateY(-2px);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .error-details {
+            margin-top: 24px;
+            padding: 16px;
+            background: #1A1A1A;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+            display: none;
+        }
+
+        .error-details.visible {
+            display: block;
+        }
+
+        #toggleDetails {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 16px;
+        }
+
+        #toggleDetails:hover {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon"><img src="skull.png" alt="Error" width="64" height="64"></div>
+        <h1 class="error-title">Упс! Что-то пошло не так</h1>
+        <p class="error-message">
+            Произошла ошибка при обработке вашего запроса. 
+            Пожалуйста, попробуйте еще раз или вернитесь на главную страницу.
+        </p>
+        <a href="/" class="back-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Вернуться на главную
+        </a>
+        
+        <button id="toggleDetails" onclick="toggleErrorDetails()">
+            Показать детали ошибки
+        </button>
+        
+        <div id="errorDetails" class="error-details">
+            <pre id="errorText">Детали ошибки будут отображены здесь</pre>
+        </div>
+    </div>
+
+    <script>
+        // Получаем параметры ошибки из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMessage = urlParams.get('error');
+        
+        if (errorMessage) {
+            document.getElementById('errorText').textContent = decodeURIComponent(errorMessage);
+        }
+
+        function toggleErrorDetails() {
+            const details = document.getElementById('errorDetails');
+            const button = document.getElementById('toggleDetails');
+            
+            details.classList.toggle('visible');
+            button.textContent = details.classList.contains('visible') 
+                ? 'Скрыть детали ошибки' 
+                : 'Показать детали ошибки';
+        }
+
+        // Анимация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.error-container').style.opacity = '0';
+            setTimeout(() => {
+                document.querySelector('.error-container').style.opacity = '1';
+                document.querySelector('.error-container').style.transition = 'opacity 0.3s ease';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
