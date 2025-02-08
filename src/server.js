@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const axios = require('axios');
 
 // Initialize express app
 const app = express();
@@ -34,45 +35,43 @@ app.get('/', (req, res) => {
     }
 });
 
-// Функция для декодирования JWT токена
-function decodeJWT(token) {
+async function getVKUserInfo(access_token, user_id) {
     try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
+        const response = await axios.get('https://api.vk.com/method/users.get', {
+            params: {
+                user_ids: user_id,
+                fields: 'photo_200',
+                access_token: access_token,
+                v: '5.131'
+            }
+        });
 
-        return JSON.parse(jsonPayload);
+        if (response.data.error) {
+            throw new Error(response.data.error.error_msg);
+        }
+
+        const user = response.data.response[0];
+        return {
+            vk_id: user.id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            photo_url: user.photo_200 || `https://vk.com/id${user_id}`
+        };
     } catch (error) {
-        console.error('JWT decode error:', error);
-        return null;
+        console.error('VK API Error:', error);
+        throw error;
     }
 }
 
-app.post('/auth/vk/login', (req, res) => {
+app.post('/auth/vk/login', async (req, res) => {
     try {
-        const { id_token, user_id } = req.body;
+        const { access_token, user_id } = req.body;
         
-        if (!id_token || !user_id) {
+        if (!access_token || !user_id) {
             throw new Error('Missing required data');
         }
 
-        const decodedToken = decodeJWT(id_token);
-        console.log('Decoded token:', decodedToken);
-
-        // Проверяем, что ID пользователя совпадает
-        if (decodedToken.sub !== user_id) {
-            throw new Error('User ID mismatch');
-        }
-
-        const userData = {
-            vk_id: user_id,
-            first_name: decodedToken.first_name || decodedToken.given_name || "VK",
-            last_name: decodedToken.last_name || decodedToken.family_name || "User",
-            photo_url: decodedToken.picture || `https://vk.com/id${user_id}`,
-        };
-
+        const userData = await getVKUserInfo(access_token, user_id);
         console.log('User data:', userData);
 
         res.json({
