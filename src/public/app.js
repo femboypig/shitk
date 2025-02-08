@@ -23,6 +23,5 @@ function vkidOnSuccess(data) {
 
 function vkidOnError(error) {
     console.error('Login error:', error);
-    // Handle login error
-    alert('Login failed. Please try again.');
+    window.location.href = `/error?error=${encodeURIComponent('Ошибка входа: ' + error.message)}`;
 } 

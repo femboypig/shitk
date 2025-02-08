@@ -80,14 +80,13 @@
                         })
                         .catch(error => {
                             console.error('Server error:', error);
-                            alert('Ошибка входа. Попробуйте позже.');
+                            window.location.href = `/error?error=${encodeURIComponent(error.message)}`;
                         });
                     }
 
                     function vkidOnError(error) {
                         console.error('VK ID Error details:', error);
-                        // Показываем более подробную ошибку
-                        alert(`Ошибка входа: ${error.message || 'Неизвестная ошибка'}`);
+                        window.location.href = `/error?error=${encodeURIComponent(error.message || 'Неизвестная ошибка')}`;
                     }
                   }
                 </script>

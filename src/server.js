@@ -86,7 +86,7 @@ app.post('/auth/vk/login', async (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'Authentication failed: ' + error.message
+            message: error.message
         });
     }
 });

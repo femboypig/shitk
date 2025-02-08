@@ -116,21 +116,52 @@
     <script>
         // Получаем параметры ошибки из URL
         const urlParams = new URLSearchParams(window.location.search);
-        const errorMessage = urlParams.get('error');
-        
-        if (errorMessage) {
-            document.getElementById('errorText').textContent = decodeURIComponent(errorMessage);
+        const error = urlParams.get('error');
+        const errorType = urlParams.get('type');
+
+        // Настраиваем заголовок и описание в зависимости от типа ошибки
+        let errorTitle = 'Упс! Что-то пошло не так';
+        let errorDescription = 'Произошла ошибка при обработке вашего запроса.';
+
+        switch(errorType) {
+            case 'auth':
+                errorTitle = 'Ошибка авторизации';
+                errorDescription = 'Не удалось выполнить вход через VK. Пожалуйста, попробуйте снова.';
+                break;
+            case 'data':
+                errorTitle = 'Ошибка загрузки данных';
+                errorDescription = 'Не удалось загрузить данные пользователя. Попробуйте обновить страницу.';
+                break;
+            case 'api':
+                errorTitle = 'Ошибка VK API';
+                errorDescription = 'Произошла ошибка при обращении к VK API. Попробуйте позже.';
+                break;
+            case 'server':
+                errorTitle = 'Ошибка сервера';
+                errorDescription = 'Сервер временно недоступен. Пожалуйста, попробуйте позже.';
+                break;
         }
 
+        // Обновляем содержимое на странице
+        document.querySelector('.error-title').textContent = errorTitle;
+        document.querySelector('.error-message').textContent = errorDescription;
+        document.getElementById('errorText').textContent = error || 'Детали ошибки недоступны';
+
+        // Функция для переключения видимости деталей ошибки
         function toggleErrorDetails() {
             const details = document.getElementById('errorDetails');
             const button = document.getElementById('toggleDetails');
-            
-            details.classList.toggle('visible');
-            button.textContent = details.classList.contains('visible') 
-                ? 'Скрыть детали ошибки' 
-                : 'Показать детали ошибки';
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                button.textContent = 'Скрыть детали ошибки';
+            } else {
+                details.style.display = 'none';
+                button.textContent = 'Показать детали ошибки';
+            }
         }
+
+        // Изначально скрываем детали ошибки
+        document.getElementById('errorDetails').style.display = 'none';
 
         // Анимация при загрузке
         document.addEventListener('DOMContentLoaded', function() {
