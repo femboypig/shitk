@@ -26,34 +26,32 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Функция для получения данных пользователя через VK API
-async function fetchVKUserData(access_token, user_id) {
+async function fetchVKUserData(access_token) {
     try {
-        const response = await axios.get(`https://api.vk.com/method/users.get`, {
+        // Используем сервисный токен доступа VK API
+        const response = await axios.get('https://api.vk.com/method/users.get', {
             params: {
-                user_ids: user_id,
-                fields: 'photo_200,email',
                 access_token: access_token,
+                fields: 'photo_200,email,first_name,last_name',
                 v: '5.131'
             }
         });
-        
-        const data = response.data;
-        
-        if (data.error) {
-            throw new Error(data.error.error_msg);
+
+        if (response.data.error) {
+            throw new Error(response.data.error.error_msg);
         }
 
-        const user = data.response[0];
+        const user = response.data.response[0];
         return {
             vk_id: user.id,
             first_name: user.first_name,
             last_name: user.last_name,
-            photo_url: user.photo_200,
+            photo_url: user.photo_200 || `https://vk.com/images/camera_200.png`,
             email: user.email,
             access_token
         };
     } catch (error) {
-        console.error('VK API Error:', error);
+        console.error('VK API Error:', error.response?.data || error.message);
         throw error;
     }
 }
@@ -70,20 +68,18 @@ app.get('/', (req, res) => {
 
 app.post('/auth/vk/login', async (req, res) => {
     try {
-        const { access_token, user_id } = req.body;
+        const { access_token } = req.body;
         
-        if (!access_token || !user_id) {
+        if (!access_token) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing access_token or user_id'
+                message: 'Missing access_token'
             });
         }
 
-        // Получаем данные пользователя через VK API
-        const userData = await fetchVKUserData(access_token, user_id);
-        
-        console.log('Processed VK user data:', userData);
-        
+        const userData = await fetchVKUserData(access_token);
+        console.log('VK user data:', userData);
+
         res.json({
             success: true,
             message: 'Authentication successful',
