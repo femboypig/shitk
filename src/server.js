@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 // Initialize express app
 const app = express();
@@ -28,8 +28,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Функция для получения данных пользователя через VK API
 async function fetchVKUserData(access_token, user_id) {
     try {
-        const response = await fetch(`https://api.vk.com/method/users.get?user_ids=${user_id}&fields=photo_200,email&access_token=${access_token}&v=5.131`);
-        const data = await response.json();
+        const response = await axios.get(`https://api.vk.com/method/users.get`, {
+            params: {
+                user_ids: user_id,
+                fields: 'photo_200,email',
+                access_token: access_token,
+                v: '5.131'
+            }
+        });
+        
+        const data = response.data;
         
         if (data.error) {
             throw new Error(data.error.error_msg);
