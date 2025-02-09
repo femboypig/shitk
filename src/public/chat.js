@@ -3,7 +3,8 @@ const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
 
 // Проверяем только user_id
 if (!userData.user_id) {
-    localStorage.setItem('redirect_after_login', '/chat');
+    // Сохраняем текущий URL для возврата после авторизации
+    localStorage.setItem('redirect_after_login', window.location.pathname);
     window.location.href = '/';
     throw new Error('Unauthorized');
 }

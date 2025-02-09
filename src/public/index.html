@@ -9,20 +9,12 @@
 window.addEventListener('DOMContentLoaded', () => {
     const userData = localStorage.getItem('vk_user');
     if (userData) {
-        try {
-            const user = JSON.parse(userData);
-            if (user.user_id) {  // Проверяем только user_id
-                const redirectPath = localStorage.getItem('redirect_after_login');
-                if (redirectPath) {
-                    localStorage.removeItem('redirect_after_login');
-                    window.location.href = redirectPath;
-                } else {
-                    window.location.href = '/dashboard';
-                }
-            }
-        } catch (error) {
-            localStorage.removeItem('vk_user');
-            localStorage.removeItem('redirect_after_login');
+        const redirectPath = localStorage.getItem('redirect_after_login');
+        if (redirectPath) {
+            localStorage.removeItem('redirect_after_login'); // Удаляем путь редиректа
+            window.location.href = redirectPath; // Перенаправляем на сохраненный путь
+        } else {
+            window.location.href = '/dashboard';
         }
     }
 });
