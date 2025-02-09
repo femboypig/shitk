@@ -137,25 +137,43 @@
     </div>
 
     <script>
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
         function saveUserToFirestore(userData) {
+            if (!userData) {
+                console.error('Invalid user data:', userData);
+                return Promise.reject(new Error('Invalid user data'));
+            }
+
             const firestore = firebase.firestore();
-            const userRef = firestore.collection('users').doc(userData.user_id.toString());
+            const uniqueId = generateUUID();
+            const userRef = firestore.collection('users').doc(uniqueId);
 
             const userDataToSave = {
-                user_id: userData.user_id,
-                first_name: userData.first_name,
-                last_name: userData.last_name,
-                email: userData.email,
-                photo_url: userData.photo_url,
-                isAdmin: false, // Default value for new users
+                uid: uniqueId,
+                vk_id: String(userData.user_id || ''),
+                first_name: userData.first_name || '',
+                last_name: userData.last_name || '',
+                email: userData.email || '',
+                photo_url: userData.photo_url || '',
+                isAdmin: false,
                 created_at: firebase.firestore.FieldValue.serverTimestamp(),
                 last_login: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             return userRef.set(userDataToSave, { merge: true })
                 .then(() => {
+                    // Сохраняем uid в localStorage вместе с остальными данными пользователя
+                    const updatedUserData = { ...userData, uid: uniqueId };
+                    localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
                     console.log('User data saved to Firestore');
-                    return userData;
+                    return updatedUserData;
                 })
                 .catch(error => {
                     console.error('Error saving user to Firestore:', error);
