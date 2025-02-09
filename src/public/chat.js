@@ -67,6 +67,20 @@ function openChat(chatId) {
     });
     selectedChat?.classList.add('active');
 }
+// Add event listener for Enter key press
+document.getElementById('messageInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+// Add click event listener for send button
+document.getElementById('sendbtn').addEventListener('click', () => {
+    sendMessage(); 
+});
+
+
+
 function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
