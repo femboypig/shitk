@@ -12,9 +12,12 @@
             --admin-success: #4CAF50;
             --admin-warning: #FFC107;
             --admin-danger: #FF3B30;
-            --admin-bg: #141414;
-            --admin-surface: #1E1E1E;
-            --admin-border: rgba(255, 255, 255, 0.1);
+            --admin-bg: #0F0F0F;
+            --admin-surface: #1A1A1A;
+            --admin-surface-hover: #222222;
+            --admin-border: rgba(255, 255, 255, 0.08);
+            --admin-text: rgba(255, 255, 255, 0.87);
+            --admin-text-secondary: rgba(255, 255, 255, 0.6);
         }
 
         body {
@@ -25,22 +28,25 @@
         }
 
         .admin-layout {
-            display: grid;
-            grid-template-columns: 280px 1fr;
+            display: flex;
             min-height: 100vh;
-            position: relative;
         }
 
         .admin-sidebar {
-            background: var(--admin-surface);
-            padding: 24px;
-            border-right: 1px solid var(--admin-border);
-            position: fixed;
-            height: 100vh;
             width: 280px;
+            height: 100vh;
+            background: var(--admin-surface);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--admin-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 24px;
             box-sizing: border-box;
-            overflow-y: auto;
-            z-index: 100;
         }
 
         .admin-logo {
@@ -81,27 +87,27 @@
         }
 
         .admin-content-wrapper {
-            margin-left: 280px; /* Отступ равен ширине сайдбара */
-            width: calc(100% - 280px); /* Ширина с учетом сайдбара */
-            min-height: 100vh;
+            flex: 1;
             padding: 32px;
+            margin-left: 280px;
+            max-width: calc(100% - 280px);
             box-sizing: border-box;
         }
 
         .admin-header {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: white;
-            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--admin-text);
         }
 
         .page-subtitle {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 16px;
+            color: var(--admin-text-secondary);
+            font-size: 14px;
         }
 
         /* Stats Grid */
@@ -109,7 +115,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .stat-card {
@@ -139,36 +145,24 @@
 
         /* Tickets Section */
         .tickets-section {
-            background: var(--admin-surface);
-            border-radius: 16px;
-            border: 1px solid var(--admin-border);
-            overflow: hidden;
-            margin-bottom: 40px;
-        }
-
-        .section-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--admin-border);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: white;
-            margin: 0;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 24px;
         }
 
         .ticket {
+            background: var(--admin-surface);
+            border: 1px solid var(--admin-border);
+            border-radius: 16px;
             padding: 24px;
-            border-bottom: 1px solid var(--admin-border);
-            transition: background 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .ticket:hover {
-            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         .ticket-header {
@@ -176,6 +170,7 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 16px;
+            gap: 16px;
         }
 
         .ticket-info {
@@ -185,8 +180,8 @@
         .ticket-subject {
             font-size: 18px;
             font-weight: 600;
-            color: white;
-            margin-bottom: 4px;
+            color: var(--admin-text);
+            margin-bottom: 8px;
         }
 
         .ticket-meta {
@@ -214,9 +209,11 @@
         }
 
         .ticket-message {
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 16px;
+            color: var(--admin-text-secondary);
+            font-size: 15px;
             line-height: 1.5;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
         }
 
         .ticket-actions {
@@ -225,8 +222,8 @@
         }
 
         .btn {
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 500;
             border: none;
@@ -244,6 +241,7 @@
 
         .btn-primary:hover {
             background: #0066dd;
+            transform: translateY(-1px);
         }
 
         .btn-danger {
@@ -321,8 +319,6 @@
         /* Navigation styles */
         .nav-content {
             display: none;
-            max-width: 1200px;
-            margin: 0 auto;
             width: 100%;
         }
 
@@ -369,19 +365,21 @@
         }
 
         @media (max-width: 768px) {
-            .admin-layout {
-                grid-template-columns: 1fr;
-            }
-
             .admin-sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
+                display: none;
             }
 
             .admin-content-wrapper {
                 margin-left: 0;
-                width: 100%;
+                max-width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket {
+                padding: 20px;
             }
         }
     </style>
@@ -432,27 +430,28 @@
         </aside>
         
         <div class="admin-content-wrapper">
+            <!-- Общая статистика, всегда видима -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Пользователей</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTickets">0</div>
+                    <div class="stat-label">Тикетов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeChats">0</div>
+                    <div class="stat-label">Активных чатов</div>
+                </div>
+            </div>
+
+            <!-- Секции с контентом -->
             <div id="overview" class="nav-content active">
                 <div class="admin-header">
-                    <h1 class="page-title">Обзор системы</h1>
-                    <p class="page-subtitle">Управление тикетами и пользователями</p>
+                    <h1 class="page-title">Обзор</h1>
+                    <p class="page-subtitle">Общая статистика и информация</p>
                 </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalUsers">0</div>
-                        <div class="stat-label">Пользователей</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalTickets">0</div>
-                        <div class="stat-label">Тикетов</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="activeChats">0</div>
-                        <div class="stat-label">Активных чатов</div>
-                    </div>
-                </div>
-
                 <div class="tickets-section">
                     <div class="section-header">
                         <h2 class="section-title">Последние тикеты</h2>
