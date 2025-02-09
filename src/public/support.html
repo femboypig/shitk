@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Профиль | VK Mini App</title>
+    <title>Поддержка | VK Mini App</title>
     <link rel="stylesheet" href="/styles.css">
     <style>
         :root {
@@ -15,6 +15,7 @@
             --text-secondary: rgba(255, 255, 255, 0.48);
             --separator: rgba(255, 255, 255, 0.12);
             --error: #FF3B30;
+            --success: #34C759;
         }
 
         * {
@@ -32,7 +33,6 @@
             display: block;
             overflow-x: hidden;
         }
-
 
         .app {
             display: flex;
@@ -116,11 +116,13 @@
             flex: 1;
             padding: 16px;
             margin-left: 280px;
-
             padding-bottom: 80px;
+            max-width: 800px;
+            margin: 0 auto;
+            margin-left: 280px;
         }
 
-        .profile-header {
+        .support-header {
             position: sticky;
             top: 0;
             z-index: 100;
@@ -139,10 +141,31 @@
         .header-content {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 12px;
             width: 100%;
             max-width: 768px;
-            position: relative;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
         }
 
         .header-title {
@@ -150,120 +173,109 @@
             font-weight: 600;
             color: var(--text-primary);
             letter-spacing: -0.3px;
-            text-align: center;
-            line-height: 1.3;
-
-            margin-bottom: 0px;
         }
 
-        .profile-section {
+        .support-section {
             background: var(--surface);
-            border-radius: 12px;
+            border-radius: 16px;
             margin-bottom: 16px;
             overflow: hidden;
             border: 1px solid var(--separator);
+            padding: 24px;
+            animation: fadeIn 0.3s ease;
         }
 
-        .profile-info {
-            padding: 32px 24px;
-            text-align: center;
+        .support-form {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 12px;
+            gap: 20px;
         }
 
-        .profile-avatar {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            border: 1px solid var(--separator);
-            transition: transform 0.2s ease;
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .profile-avatar:hover {
-            transform: scale(1.02);
-        }
-
-        .change-photo {
-            color: var(--accent);
-            text-decoration: none;
+        .form-label {
             font-size: 14px;
             font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background: rgba(0, 119, 255, 0.1);
-            transition: all 0.2s ease;
-            margin-top: 4px;
+            color: var(--text-secondary);
+            margin-left: 4px;
         }
 
-        .change-photo:hover {
-            background: rgba(0, 119, 255, 0.15);
+        .form-input {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--separator);
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text-primary);
+            font-size: 15px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(0, 119, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        textarea.form-input {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .submit-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .submit-button:hover {
+            background: #0066dd;
             transform: translateY(-1px);
         }
 
-        .change-photo:active {
-            transform: translateY(0px);
+        .submit-button:active {
+            transform: translateY(0);
         }
 
-        .menu-items {
-            padding: 4px;
-        }
-
-        .menu-item {
-            display: flex;
+        .success-message, .error-message {
+            display: none;
             align-items: center;
-            padding: 12px;
-            gap: 12px;
+            gap: 10px;
+            padding: 16px;
             border-radius: 12px;
-            margin: 4px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--text-primary);
-        }
-
-        .menu-item:hover {
-            background: var(--surface-hover);
-        }
-
-        .menu-item-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--text-secondary);
-        }
-
-        .menu-item-content {
-            flex: 1;
-        }
-
-        .menu-item-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 2px;
-        }
-
-        .menu-item-value {
             font-size: 14px;
             font-weight: 500;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s ease;
         }
 
-        .vk-icon {
-            background: var(--accent);
-            color: white;
+        .success-message {
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
         }
 
-        .logout {
+        .error-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid var(--error);
             color: var(--error);
-            border: none;
-            background: none;
-            width: 100%;
-            font-family: inherit;
         }
 
         /* Мобильная навигация */
@@ -310,10 +322,6 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        .mobile-nav-item:active {
-            background: rgba(255, 255, 255, 0.04);
-        }
-
         .mobile-nav-icon {
             width: 24px;
             height: 24px;
@@ -337,6 +345,16 @@
             justify-content: center;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Адаптивность */
         @media (max-width: 1023px) {
             .sidebar {
@@ -350,43 +368,24 @@
             .mobile-nav {
                 display: block;
             }
+            .support-section {
+                border-radius: 12px;
+                padding: 20px;
+            }
         }
 
         @media (min-width: 1024px) {
             .content {
-
                 padding: 24px;
+                max-width: 800px;
             }
-            .profile-header {
+            .support-header {
                 margin: -24px -24px 24px -24px;
                 padding: 24px;
                 background: rgba(15, 15, 15, 0.75);
             }
             .header-title {
                 font-size: 22px;
-            }
-            .profile-section {
-                border-radius: 16px;
-            }
-            .profile-info {
-                padding: 32px;
-            }
-            .profile-avatar {
-                width: 120px;
-                height: 120px;
-            }
-            .menu-items {
-                padding: 8px;
-            }
-            .menu-item {
-                padding: 16px;
-            }
-            .menu-item-icon {
-                width: 44px;
-                height: 44px;
-            }
-            .menu-item-value {
-                font-size: 15px;
             }
         }
 
@@ -398,92 +397,10 @@
             .content {
                 padding-bottom: calc(80px + env(safe-area-inset-bottom));
             }
-            .profile-header {
+            .support-header {
                 padding-top: max(16px, env(safe-area-inset-top));
             }
         }
-
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .app {
-            animation: fadeIn 0.3s ease;
-        }
-
-        /* Toggle Switch Styles */
-        .toggle-switch {
-            position: relative;
-            width: 44px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-            position: absolute;
-        }
-
-        .toggle-switch label {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            border-radius: 24px;
-            border: 1px solid var(--separator);
-        }
-
-        .toggle-switch label:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 2px;
-            bottom: 2px;
-            background: var(--text-secondary);
-            transition: all 0.3s ease;
-            border-radius: 50%;
-        }
-
-        .toggle-switch input:checked + label {
-            background: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .toggle-switch input:checked + label:before {
-            transform: translateX(20px);
-            background: white;
-        }
-
-        .toggle-switch input:focus + label {
-            box-shadow: 0 0 0 2px rgba(0, 119, 255, 0.2);
-        }
-
-        .toggle-switch label:active:before {
-            width: 22px;
-        }
-
-        .toggle-switch input:checked + label:active:before {
-            transform: translateX(16px);
-        }
-
-        @media (hover: hover) {
-            .toggle-switch label:hover {
-                background: rgba(255, 255, 255, 0.15);
-            }
-            .toggle-switch input:checked + label:hover {
-                background: #0066dd;
-            }
-        }
-    
     </style>
 </head>
 <body>
@@ -501,13 +418,13 @@
                     </svg>
                     Чат
                 </a>
-                <a href="/dashboard" class="sidebar-nav-item active">
+                <a href="/dashboard" class="sidebar-nav-item">
                     <svg class="sidebar-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
                     </svg>
                     Профиль
                 </a>
-                <a href="/support" class="sidebar-nav-item">
+                <a href="/support" class="sidebar-nav-item active">
                     <svg class="sidebar-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M22 2L11 13"/>
                         <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
@@ -517,86 +434,49 @@
             </nav>
         </aside>
 
-        <!-- Основной контент -->
         <main class="content">
-            <div class="profile-header">
+            <div class="support-header">
                 <div class="header-content">
-                    <h1 class="header-title">Настройки</h1>
-                </div>
-            </div>
-
-            <div class="profile-section">
-                <div class="profile-info">
-                    <img src="" alt="" class="profile-avatar" id="userAvatar">
-                    <a href="#" class="change-photo">Изменить фото</a>
-                </div>
-
-                <div class="menu-items">
-                    <div class="menu-item">
-                        <div class="menu-item-icon">@</div>
-                        <div class="menu-item-content">
-                            <div class="menu-item-label">Адрес электронной почты</div>
-                            <div class="menu-item-value" id="userEmail">Загрузка...</div>
-                        </div>
-                    </div>
-
-                    <div class="menu-item">
-                        <div class="menu-item-icon vk-icon">
-<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 48 48">
-<path fill="#1976d2" d="M42,37c0,2.762-2.238,5-5,5H11c-2.761,0-5-2.238-5-5V11c0-2.762,2.239-5,5-5h26c2.762,0,5,2.238,5,5 V37z"></path><path fill="#fff" d="M35.937,18.041c0.046-0.151,0.068-0.291,0.062-0.416C35.984,17.263,35.735,17,35.149,17h-2.618 c-0.661,0-0.966,0.4-1.144,0.801c0,0-1.632,3.359-3.513,5.574c-0.61,0.641-0.92,0.625-1.25,0.625C26.447,24,26,23.786,26,23.199 v-5.185C26,17.32,25.827,17,25.268,17h-4.649C20.212,17,20,17.32,20,17.641c0,0.667,0.898,0.827,1,2.696v3.623 C21,24.84,20.847,25,20.517,25c-0.89,0-2.642-3-3.815-6.932C16.448,17.294,16.194,17,15.533,17h-2.643 C12.127,17,12,17.374,12,17.774c0,0.721,0.6,4.619,3.875,9.101C18.25,30.125,21.379,32,24.149,32c1.678,0,1.85-0.427,1.85-1.094 v-2.972C26,27.133,26.183,27,26.717,27c0.381,0,1.158,0.25,2.658,2c1.73,2.018,2.044,3,3.036,3h2.618 c0.608,0,0.957-0.255,0.971-0.75c0.003-0.126-0.015-0.267-0.056-0.424c-0.194-0.576-1.084-1.984-2.194-3.326 c-0.615-0.743-1.222-1.479-1.501-1.879C32.062,25.36,31.991,25.176,32,25c0.009-0.185,0.105-0.361,0.249-0.607 C32.223,24.393,35.607,19.642,35.937,18.041z"></path>
-</svg>
-                        </div>
-                        <div class="menu-item-content">
-                            <div class="menu-item-value">Вы вошли с VK ID</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-section">
-                <div class="menu-items">
-                    <div class="menu-item">
-                        <div class="menu-item-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>
-                            </svg>
-                        </div>
-                        <div class="menu-item-content">
-                            <div class="menu-item-label">Уведомления</div>
-                            <div class="menu-item-value">Новые сообщения</div>
-                        </div>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="notificationToggle" checked>
-                            <label for="notificationToggle"></label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-section">
-                <div class="menu-items">
-                    <a href="/support" class="menu-item">
-                        <div class="menu-item-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                            </svg>
-                        </div>
-                        <div class="menu-item-content">
-                            <div class="menu-item-value">Написать в поддержку</div>
-                        </div>
+                    <a href="/dashboard" class="back-button">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
                     </a>
-
-                    <button class="menu-item logout">
-                        <div class="menu-item-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-                            </svg>
-                        </div>
-                        <div class="menu-item-content">
-                            <div class="menu-item-value">Выйти из профиля</div>
-                        </div>
-                    </button>
+                    <h1 class="header-title">Поддержка</h1>
                 </div>
+            </div>
+
+            <div class="support-section">
+                <div class="success-message" id="successMessage">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <path d="M22 4L12 14.01l-3-3"/>
+                    </svg>
+                    Ваше сообщение успешно отправлено
+                </div>
+
+                <div class="error-message" id="errorMessage">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12" y2="16"/>
+                    </svg>
+                    Произошла ошибка при отправке сообщения
+                </div>
+
+                <form class="support-form" id="supportForm">
+                    <div class="form-group">
+                        <label class="form-label" for="subject">Тема обращения</label>
+                        <input type="text" id="subject" class="form-input" required placeholder="Введите тему обращения">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="message">Сообщение</label>
+                        <textarea id="message" class="form-input" required placeholder="Опишите вашу проблему или вопрос подробно"></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-button">Отправить сообщение</button>
+                </form>
             </div>
         </main>
 
@@ -610,13 +490,13 @@
                     Чат
                     <span class="mobile-nav-counter">2</span>
                 </a>
-                <a href="/dashboard" class="mobile-nav-item active">
+                <a href="/dashboard" class="mobile-nav-item">
                     <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
                     </svg>
                     Профиль
                 </a>
-                <a href="/support" class="mobile-nav-item">
+                <a href="/support" class="mobile-nav-item active">
                     <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M22 2L11 13"/>
                         <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
@@ -634,7 +514,7 @@
         // Функция обновления UI
         function updateUserInterface(data) {
             // Обновляем аватары
-            const avatarElements = ['userAvatar', 'sidebarAvatar'];
+            const avatarElements = ['sidebarAvatar'];
             avatarElements.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -652,12 +532,6 @@
                     element.textContent = fullName || 'Гость';
                 }
             });
-
-            // Обновляем email
-            const emailElement = document.getElementById('userEmail');
-            if (emailElement) {
-                emailElement.textContent = data.email || 'Не указан';
-            }
         }
 
         // Проверяем есть ли данные в localStorage
@@ -681,10 +555,50 @@
                 });
         }
 
-        // Обработчик выхода
-        document.querySelector('.logout').addEventListener('click', () => {
-            localStorage.removeItem('vk_user');
-            window.location.href = '/';
+        // Обработка формы
+        document.getElementById('supportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Отправка...';
+            submitButton.disabled = true;
+            
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            try {
+                const response = await fetch('/api/support', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ subject, message })
+                });
+
+                if (response.ok) {
+                    successMessage.style.display = 'flex';
+                    errorMessage.style.display = 'none';
+                    document.getElementById('supportForm').reset();
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                successMessage.style.display = 'none';
+                errorMessage.style.display = 'flex';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            } finally {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
         });
 
         // Анимация при загрузке
@@ -697,4 +611,4 @@
         });
     </script>
 </body>
-</html>
+</html> 

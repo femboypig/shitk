@@ -21,6 +21,7 @@
             }
         });
     </script>
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -70,13 +71,20 @@
                             })
                         })
                         .then(response => response.json())
-                        .then(result => {
-                            if (result.success) {
-                                localStorage.setItem('vk_user', JSON.stringify(result.user));
-                                window.location.href = '/dashboard';
+                        .then(data => {
+                            if (data.success) {
+                                // Save user data to localStorage
+                                localStorage.setItem('vk_user', JSON.stringify(data.user));
+                                
+                                // Save user data to Firestore
+                                return saveUserToFirestore(data.user);
                             } else {
-                                throw new Error(result.message);
+                                throw new Error(data.error || 'Authentication failed');
                             }
+                        })
+                        .then(() => {
+                            // Redirect after successful save
+                            window.location.href = '/dashboard';
                         })
                         .catch(error => {
                             console.error('Server error:', error);
@@ -111,5 +119,35 @@
             <a href="/privacy">Политики конфиденциальности</a>
         </div>
     </div>
+
+    <script>
+        function saveUserToFirestore(userData) {
+            const firestore = firebase.firestore();
+            const userRef = firestore.collection('users').doc(userData.user_id.toString());
+
+            const userDataToSave = {
+                user_id: userData.user_id,
+                first_name: userData.first_name,
+                last_name: userData.last_name,
+                email: userData.email,
+                photo_url: userData.photo_url,
+                isAdmin: false, // Default value for new users
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                last_login: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            return userRef.set(userDataToSave, { merge: true })
+                .then(() => {
+                    console.log('User data saved to Firestore');
+                    return userData;
+                })
+                .catch(error => {
+                    console.error('Error saving user to Firestore:', error);
+                    throw error;
+                });
+        }
+    </script>
+
+
 </body>
 </html> 

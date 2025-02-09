@@ -117,6 +117,47 @@ app.get('/chat', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
 
+
+app.get('/support', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'support.html'));
+});
+
+// Support endpoint
+app.post('/api/support', async (req, res) => {
+    try {
+        const { subject, message } = req.body;
+        
+        // Here you would typically:
+        // 1. Validate the input
+        if (!subject || !message) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Subject and message are required' 
+            });
+        }
+
+        // 2. Store in database or send to support system
+        // For now, we'll just log it
+        console.log('Support request received:', {
+            subject,
+            message,
+            timestamp: new Date().toISOString()
+        });
+
+        // 3. Send success response
+        res.json({ 
+            success: true, 
+            message: 'Support request received' 
+        });
+    } catch (error) {
+        console.error('Support error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Internal server error' 
+        });
+    }
+});
+
 // Start server with error handling
 const server = app.listen(port, () => {
     console.log(`Server running on port ${port}`);
