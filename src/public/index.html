@@ -6,20 +6,25 @@
     <title>Вход или регистрация</title>
     <link rel="stylesheet" href="/styles.css">
     <script>
-        // Проверяем авторизацию при загрузке страницы
-        window.addEventListener('DOMContentLoaded', () => {
-            const userData = localStorage.getItem('vk_user');
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    // Если есть данные пользователя, редиректим на профиль
-                    window.location.href = '/dashboard';
-                } catch (error) {
-                    // Если данные повреждены, очищаем их
-                    localStorage.removeItem('vk_user');
-                }
+window.addEventListener('DOMContentLoaded', () => {
+    const userData = localStorage.getItem('vk_user');
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            // Проверяем, есть ли сохраненный путь для редиректа
+            const redirectPath = localStorage.getItem('redirect_after_login');
+            if (redirectPath) {
+                localStorage.removeItem('redirect_after_login');
+                window.location.href = redirectPath;
+            } else {
+                window.location.href = '/dashboard';
             }
-        });
+        } catch (error) {
+            localStorage.removeItem('vk_user');
+            localStorage.removeItem('redirect_after_login');
+        }
+    }
+});
     </script>
 
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>

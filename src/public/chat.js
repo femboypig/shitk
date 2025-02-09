@@ -1,14 +1,23 @@
 // Проверяем авторизацию
 const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
-if (!userData.user_id) {
-    window.location.href = '/?redirect=/chat';
+if (!userData.user_id || !userData.uid) {
+    // Сохраняем текущий URL для возврата после авторизации
+    const currentPath = window.location.pathname;
+    localStorage.setItem('redirect_after_login', currentPath);
+    window.location.href = '/';
+    throw new Error('Unauthorized');
 }
 
-if (userData.uid) {
-    firebase.auth().signInWithCustomToken(userData.uid).catch(function(error) {
-        console.error('Error signing in with custom token:', error);
-    });
-}
+// Инициализируем Firebase Auth
+firebase.auth().onAuthStateChanged((user) => {
+    if (!user) {
+        // Пытаемся войти с помощью custom token
+        firebase.auth().signInWithCustomToken(userData.uid).catch(function(error) {
+            console.error('Error signing in with custom token:', error);
+            window.location.href = '/';
+        });
+    }
+});
 
 const database = firebase.database();
 const messagesRef = database.ref('messages');
