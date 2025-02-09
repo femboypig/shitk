@@ -683,10 +683,13 @@
 
         // Обработчик выхода
         document.querySelector('.logout').addEventListener('click', () => {
-            localStorage.removeItem('vk_user');
-            window.location.href = '/';
+            logout();
         });
-
+        function logout() {
+    localStorage.removeItem('vk_user');
+    localStorage.setItem('logged', 'false');
+    window.location.href = '/';
+}
         // Анимация при загрузке
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelector('.app').style.opacity = '0';

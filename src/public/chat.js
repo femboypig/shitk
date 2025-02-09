@@ -1,10 +1,9 @@
 // Проверяем авторизацию
 const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
+const isLogged = localStorage.getItem('logged') === 'true';
 
-// Проверяем только user_id
-if (!userData.user_id) {
-    // Сохраняем текущий URL для возврата после авторизации
-    localStorage.setItem('redirect_after_login', window.location.pathname);
+if (!isLogged) {
+    localStorage.setItem('redirect_after_login', '/chat');
     window.location.href = '/';
     throw new Error('Unauthorized');
 }

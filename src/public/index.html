@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="/styles.css">
     <script>
 window.addEventListener('DOMContentLoaded', () => {
-    const userData = localStorage.getItem('vk_user');
-    if (userData) {
+    const isLogged = localStorage.getItem('logged') === 'true';
+    if (isLogged) {
         const redirectPath = localStorage.getItem('redirect_after_login');
         if (redirectPath) {
-            localStorage.removeItem('redirect_after_login'); // Удаляем путь редиректа
-            window.location.href = redirectPath; // Перенаправляем на сохраненный путь
+            localStorage.removeItem('redirect_after_login');
+            window.location.href = redirectPath;
         } else {
             window.location.href = '/dashboard';
         }
@@ -89,6 +89,7 @@ window.addEventListener('DOMContentLoaded', () => {
                             if (data.success) {
                                 // Save user data to localStorage
                                 localStorage.setItem('vk_user', JSON.stringify(data.user));
+                                localStorage.setItem('logged', 'true');
                                 
                                 // Save user data to Firestore
                                 return saveUserToFirestore(data.user);
