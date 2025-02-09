@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ панель | VK Mini App</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--separator);
+            padding: 24px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .admin-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 24px;
+        }
+
+        .admin-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .support-tickets {
+            display: grid;
+            gap: 16px;
+        }
+
+        .ticket {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--separator);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .ticket-subject {
+            font-weight: 600;
+        }
+
+        .ticket-time {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .ticket-message {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ticket-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .reply-button {
+            background: var(--accent);
+            color: white;
+        }
+
+        .close-button {
+            background: var(--error);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--separator);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-sidebar">
+            <h2>Админ панель</h2>
+            <nav class="admin-nav">
+                <!-- Add navigation items here -->
+            </nav>
+        </div>
+
+        <main class="admin-content">
+            <div class="admin-header">
+                <h1>Панель управления</h1>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Пользователей</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTickets">0</div>
+                    <div class="stat-label">Тикетов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeChats">0</div>
+                    <div class="stat-label">Активных чатов</div>
+                </div>
+            </div>
+
+            <h2>Тикеты поддержки</h2>
+            <div class="support-tickets" id="ticketsList">
+                <!-- Tickets will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Initialize Firebase (use your existing config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0ksObwMb6BBZN3WQBYDTLEKNHdG3fr3U",
+            authDomain: "shitk-p.firebaseapp.com",
+            databaseURL: "https://shitk-p-default-rtdb.firebaseio.com",
+            projectId: "shitk-p",
+            storageBucket: "shitk-p.firebasestorage.app",
+            messagingSenderId: "860946224153",
+            appId: "1:860946224153:web:cc1d2b7df27e434f9e0688"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const firestore = firebase.firestore();
+
+        // Check if user is admin
+        async function checkAdminAccess() {
+            const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
+            if (!userData.uid) {
+                window.location.href = '/';
+                return;
+            }
+
+            const userDoc = await firestore.collection('users').doc(userData.uid).get();
+            if (!userDoc.exists || !userDoc.data().isAdmin) {
+                window.location.href = '/dashboard';
+                return;
+            }
+        }
+
+        // Load support tickets
+        async function loadTickets() {
+            const ticketsSnapshot = await firestore.collection('support_tickets')
+                .orderBy('created_at', 'desc')
+                .get();
+
+            const ticketsList = document.getElementById('ticketsList');
+            ticketsList.innerHTML = '';
+
+            ticketsSnapshot.forEach(doc => {
+                const ticket = doc.data();
+                const ticketElement = document.createElement('div');
+                ticketElement.className = 'ticket';
+                ticketElement.innerHTML = `
+                    <div class="ticket-header">
+                        <div class="ticket-subject">${ticket.subject}</div>
+                        <div class="ticket-time">${new Date(ticket.created_at?.toDate()).toLocaleString()}</div>
+                    </div>
+                    <div class="ticket-message">${ticket.message}</div>
+                    <div class="ticket-actions">
+                        <button class="ticket-button reply-button" onclick="replyToTicket('${doc.id}')">Ответить</button>
+                        <button class="ticket-button close-button" onclick="closeTicket('${doc.id}')">Закрыть</button>
+                    </div>
+                `;
+                ticketsList.appendChild(ticketElement);
+            });
+        }
+
+        // Initialize admin panel
+        async function initAdminPanel() {
+            await checkAdminAccess();
+            await loadTickets();
+            // Add more initialization logic here
+        }
+
+        // Start initialization
+        initAdminPanel().catch(console.error);
+    </script>
+</body>
+</html> 

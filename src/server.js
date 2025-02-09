@@ -122,6 +122,11 @@ app.get('/support', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'support.html'));
 });
 
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+
 // Support endpoint
 app.post('/api/support', async (req, res) => {
     try {

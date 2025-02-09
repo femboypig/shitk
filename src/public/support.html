@@ -117,7 +117,6 @@
             padding: 16px;
             margin-left: 280px;
             padding-bottom: 80px;
-            max-width: 800px;
             margin: 0 auto;
             margin-left: 280px;
         }
@@ -172,6 +171,7 @@
             font-size: 20px;
             font-weight: 600;
             color: var(--text-primary);
+            margin-bottom: 0px;
             letter-spacing: -0.3px;
         }
 
@@ -377,7 +377,6 @@
         @media (min-width: 1024px) {
             .content {
                 padding: 24px;
-                max-width: 800px;
             }
             .support-header {
                 margin: -24px -24px 24px -24px;
@@ -555,51 +554,52 @@
                 });
         }
 
-        // Обработка формы
         document.getElementById('supportForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const submitButton = e.target.querySelector('button[type="submit"]');
-            const originalText = submitButton.textContent;
-            submitButton.textContent = 'Отправка...';
-            submitButton.disabled = true;
-            
-            const subject = document.getElementById('subject').value;
-            const message = document.getElementById('message').value;
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
+    e.preventDefault();
+    
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    submitButton.textContent = 'Отправка...';
+    submitButton.disabled = true;
+    
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value;
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
 
-            try {
-                const response = await fetch('/api/support', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ subject, message })
-                });
+    try {
+        const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
+        const ticketData = {
+            subject,
+            message,
+            user_id: userData.uid,
+            user_name: `${userData.first_name} ${userData.last_name}`,
+            status: 'open',
+            created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
-                if (response.ok) {
-                    successMessage.style.display = 'flex';
-                    errorMessage.style.display = 'none';
-                    document.getElementById('supportForm').reset();
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 5000);
-                } else {
-                    throw new Error('Failed to send message');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                successMessage.style.display = 'none';
-                errorMessage.style.display = 'flex';
-                setTimeout(() => {
-                    errorMessage.style.display = 'none';
-                }, 5000);
-            } finally {
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-            }
-        });
+        await firebase.firestore().collection('support_tickets').add(ticketData);
+        
+        successMessage.style.display = 'flex';
+        errorMessage.style.display = 'none';
+        document.getElementById('supportForm').reset();
+        
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 5000);
+    } catch (error) {
+        console.error('Error:', error);
+        successMessage.style.display = 'none';
+        errorMessage.style.display = 'flex';
+        setTimeout(() => {
+            errorMessage.style.display = 'none';
+        }, 5000);
+    } finally {
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+    }
+});
 
         // Анимация при загрузке
         document.addEventListener('DOMContentLoaded', function() {
