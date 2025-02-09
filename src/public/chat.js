@@ -1,23 +1,14 @@
 // Проверяем авторизацию
 const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
 
-// Проверяем только user_id, так как uid может еще не быть при первом входе
+// Проверяем только user_id
 if (!userData.user_id) {
-    window.location.href = '/?redirect=/chat';
+    localStorage.setItem('redirect_after_login', '/chat');
+    window.location.href = '/';
     throw new Error('Unauthorized');
 }
 
-// Инициализируем Firebase Auth
-firebase.auth().onAuthStateChanged((user) => {
-    if (!user) {
-        // Пытаемся войти с помощью custom token
-        firebase.auth().signInWithCustomToken(userData.uid).catch(function(error) {
-            console.error('Error signing in with custom token:', error);
-            window.location.href = '/';
-        });
-    }
-});
-
+// Убираем проверку Firebase Auth, так как она создает проблемы
 const database = firebase.database();
 const messagesRef = database.ref('messages');
 const chatsRef = database.ref('chats');
@@ -166,6 +157,16 @@ function loadUserData() {
 document.addEventListener('DOMContentLoaded', () => {
     loadUserData();
     loadChats();
+    
+    // Добавляем обработчик для кнопки отправки
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
 });
 
 // Функция поиска пользователей
