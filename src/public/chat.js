@@ -67,7 +67,6 @@ function openChat(chatId) {
     });
     selectedChat?.classList.add('active');
 }
-
 function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
@@ -82,10 +81,8 @@ function sendMessage() {
             chatId: currentChatId
         };
         
-        // Отправляем сообщение в конкретный чат
         messagesRef.child(currentChatId).push(message)
             .then(() => {
-                // Обновляем последнее сообщение в чате
                 return chatsRef.child(currentChatId).update({
                     lastMessage: text,
                     lastMessageTime: Date.now()
@@ -98,7 +95,33 @@ function sendMessage() {
         input.value = '';
     }
 }
+async function startNewChat(userId, user) {
+    // Проверяем существующий чат
+    const existingChat = await findExistingChat(userId);
+    
+    if (existingChat) {
+        openChat(existingChat);
+        return;
+    }
 
+    // Создаем новый чат
+    const newChatRef = chatsRef.push();
+    const chatId = newChatRef.key;
+    
+    const chatData = {
+        name: `${user.first_name} ${user.last_name}`,
+        participants: {
+            [userData.user_id]: true,
+            [userId]: true
+        },
+        created_at: Date.now(),
+        lastMessage: 'Начните общение',
+        lastMessageTime: Date.now()
+    };
+
+    await newChatRef.set(chatData);
+    openChat(chatId);
+}
 // Добавляем обработчик для кнопки отправки
 document.querySelector('.send-button').addEventListener('click', sendMessage);
 // Загружаем последние 50 сообщений
