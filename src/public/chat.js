@@ -68,7 +68,6 @@ function openChat(chatId) {
     selectedChat?.classList.add('active');
 }
 
-// Обновляем функцию sendMessage
 function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
@@ -84,18 +83,24 @@ function sendMessage() {
         };
         
         // Отправляем сообщение в конкретный чат
-        messagesRef.child(currentChatId).push(message);
-        
-        // Обновляем последнее сообщение в чате
-        chatsRef.child(currentChatId).update({
-            lastMessage: text,
-            lastMessageTime: Date.now()
-        });
+        messagesRef.child(currentChatId).push(message)
+            .then(() => {
+                // Обновляем последнее сообщение в чате
+                return chatsRef.child(currentChatId).update({
+                    lastMessage: text,
+                    lastMessageTime: Date.now()
+                });
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
 
         input.value = '';
     }
 }
 
+// Добавляем обработчик для кнопки отправки
+document.querySelector('.send-button').addEventListener('click', sendMessage);
 // Загружаем последние 50 сообщений
 messagesRef.limitToLast(50).once('value', (snapshot) => {
     const messages = snapshot.val();
@@ -152,20 +157,24 @@ function loadUserData() {
         document.getElementById('sidebarName').textContent = user.first_name + ' ' + user.last_name;
     }
 }
-
-// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     loadUserData();
     loadChats();
     
-    // Добавляем обработчик для кнопки отправки
+    // Добавляем обработчики для отправки сообщений
     const messageInput = document.getElementById('messageInput');
+    const sendButton = document.querySelector('.send-button');
+    
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendMessage();
             }
         });
+    }
+    
+    if (sendButton) {
+        sendButton.addEventListener('click', sendMessage);
     }
 });
 
@@ -182,9 +191,10 @@ function searchUsers(query) {
     
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        // Получаем всех пользователей и фильтруем локально
-        // Это временное решение, пока не настроим индексы в Firebase
-        firebase.database().ref('users')
+        // Используем индекс для поиска
+        usersRef.orderByChild('first_name')
+            .startAt(query.toLowerCase())
+            .endAt(query.toLowerCase() + '\uf8ff')
             .once('value')
             .then((snapshot) => {
                 searchResults.innerHTML = '';
@@ -195,37 +205,23 @@ function searchUsers(query) {
                     return;
                 }
 
-                const filteredUsers = Object.entries(users).filter(([userId, user]) => {
-                    const searchStr = query.toLowerCase();
-                    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
-                    const email = (user.email || '').toLowerCase();
-                    
-                    return userId !== userData.user_id && ( // Исключаем текущего пользователя
-                        fullName.includes(searchStr) ||
-                        email.includes(searchStr)
-                    );
-                });
-
-                if (filteredUsers.length === 0) {
-                    searchResults.innerHTML = '<div class="no-results">Пользователи не найдены</div>';
-                    return;
-                }
-
-                filteredUsers.forEach(([userId, user]) => {
-                    const userElement = document.createElement('div');
-                    userElement.className = 'search-result-item';
-                    userElement.innerHTML = `
-                        <img src="${user.photo_url || 'https://vk.com/images/camera_50.png'}" class="user-avatar">
-                        <div class="user-info">
-                            <div class="user-name">${user.first_name} ${user.last_name}</div>
-                            <div class="user-email">${user.email || ''}</div>
-                        </div>
-                        <button class="start-chat-btn">Написать</button>
-                    `;
-                    
-                    userElement.querySelector('.start-chat-btn').onclick = () => startNewChat(userId, user);
-                    searchResults.appendChild(userElement);
-                });
+                Object.entries(users)
+                    .filter(([userId]) => userId !== userData.user_id)
+                    .forEach(([userId, user]) => {
+                        const userElement = document.createElement('div');
+                        userElement.className = 'search-result-item';
+                        userElement.innerHTML = `
+                            <img src="${user.photo_url || 'https://vk.com/images/camera_50.png'}" class="user-avatar">
+                            <div class="user-info">
+                                <div class="user-name">${user.first_name} ${user.last_name}</div>
+                                <div class="user-email">${user.email || ''}</div>
+                            </div>
+                            <button class="start-chat-btn">Написать</button>
+                        `;
+                        
+                        userElement.querySelector('.start-chat-btn').onclick = () => startNewChat(userId, user);
+                        searchResults.appendChild(userElement);
+                    });
             })
             .catch(error => {
                 console.error('Error searching users:', error);
