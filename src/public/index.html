@@ -11,13 +11,14 @@ window.addEventListener('DOMContentLoaded', () => {
     if (userData) {
         try {
             const user = JSON.parse(userData);
-            // Проверяем, есть ли сохраненный путь для редиректа
-            const redirectPath = localStorage.getItem('redirect_after_login');
-            if (redirectPath) {
-                localStorage.removeItem('redirect_after_login');
-                window.location.href = redirectPath;
-            } else {
-                window.location.href = '/dashboard';
+            if (user.user_id) {  // Проверяем только user_id
+                const redirectPath = localStorage.getItem('redirect_after_login');
+                if (redirectPath) {
+                    localStorage.removeItem('redirect_after_login');
+                    window.location.href = redirectPath;
+                } else {
+                    window.location.href = '/dashboard';
+                }
             }
         } catch (error) {
             localStorage.removeItem('vk_user');
