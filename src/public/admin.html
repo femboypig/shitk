@@ -6,166 +6,277 @@
     <title>Админ панель | VK Mini App</title>
     <link rel="stylesheet" href="/styles.css">
     <style>
-        .admin-container {
-            display: flex;
+        :root {
+            --admin-primary: #0077FF;
+            --admin-secondary: #45B6FE;
+            --admin-success: #4CAF50;
+            --admin-warning: #FFC107;
+            --admin-danger: #FF3B30;
+            --admin-bg: #141414;
+            --admin-surface: #1E1E1E;
+            --admin-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--admin-bg);
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            justify-content: unset;
+        }
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
             min-height: 100vh;
-            background: var(--background);
-            color: var(--text-primary);
+            position: relative;
         }
 
         .admin-sidebar {
-            width: 280px;
-            background: var(--surface);
-            border-right: 1px solid var(--separator);
+            background: var(--admin-surface);
             padding: 24px;
+            border-right: 1px solid var(--admin-border);
             position: fixed;
             height: 100vh;
+            width: 280px;
+            box-sizing: border-box;
             overflow-y: auto;
+            z-index: 100;
         }
 
-        .admin-content {
-            flex: 1;
-            margin-left: 280px;
-            padding: 24px;
-            max-width: 1200px;
-        }
-
-        .admin-header {
-            background: var(--surface);
-            padding: 24px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            border: 1px solid var(--separator);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
+        .admin-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
             margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .stat-card {
-            background: var(--surface);
+        .admin-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
             border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--separator);
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             transition: all 0.2s ease;
         }
 
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: var(--admin-primary);
+            color: white;
+        }
+
+        .admin-content-wrapper {
+            margin-left: 280px; /* Отступ равен ширине сайдбара */
+            width: calc(100% - 280px); /* Ширина с учетом сайдбара */
+            min-height: 100vh;
+            padding: 32px;
+            box-sizing: border-box;
+        }
+
+        .admin-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin: 0 0 8px 0;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--admin-surface);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--admin-border);
+            transition: transform 0.2s ease;
+        }
+
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
         }
 
         .stat-value {
             font-size: 36px;
             font-weight: 700;
+            color: white;
             margin-bottom: 8px;
-            background: linear-gradient(45deg, #0077FF, #00A3FF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
         .stat-label {
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.6);
             font-size: 14px;
             font-weight: 500;
         }
 
+        /* Tickets Section */
+        .tickets-section {
+            background: var(--admin-surface);
+            border-radius: 16px;
+            border: 1px solid var(--admin-border);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--admin-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+        }
+
         .ticket {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid var(--separator);
-            transition: all 0.2s ease;
+            padding: 24px;
+            border-bottom: 1px solid var(--admin-border);
+            transition: background 0.2s ease;
         }
 
         .ticket:hover {
-            transform: translateX(4px);
-            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .ticket-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .ticket-info {
+            flex: 1;
         }
 
         .ticket-subject {
             font-size: 18px;
             font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
         }
 
-        .ticket-time {
-            color: var(--text-secondary);
+        .ticket-meta {
+            display: flex;
+            gap: 16px;
+            color: rgba(255, 255, 255, 0.6);
             font-size: 14px;
         }
 
+        .ticket-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-open {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status-closed {
+            background: rgba(255, 59, 48, 0.2);
+            color: #FF3B30;
+        }
+
         .ticket-message {
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.8);
             margin-bottom: 16px;
             line-height: 1.5;
         }
 
         .ticket-actions {
             display: flex;
-            gap: 8px;
+            gap: 12px;
         }
 
-        .ticket-button {
+        .btn {
             padding: 8px 16px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
-            cursor: pointer;
             border: none;
-            transition: all 0.2s ease;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s ease;
         }
 
-        .reply-button {
-            background: var(--accent);
+        .btn-primary {
+            background: var(--admin-primary);
             color: white;
         }
 
-        .reply-button:hover {
+        .btn-primary:hover {
             background: #0066dd;
         }
 
-        .close-button {
-            background: var(--error);
+        .btn-danger {
+            background: var(--admin-danger);
             color: white;
         }
 
-        .close-button:hover {
+        .btn-danger:hover {
             background: #dd3326;
         }
 
-        .reply-modal {
-            display: none;
+        /* Modal Styles */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
             padding: 24px;
+            z-index: 1000;
         }
 
         .modal-content {
-            background: var(--surface);
+            background: var(--admin-surface);
             border-radius: 16px;
             padding: 24px;
+            width: 100%;
             max-width: 600px;
-            margin: 64px auto;
-            border: 1px solid var(--separator);
+            border: 1px solid var(--admin-border);
         }
 
         .modal-header {
@@ -175,72 +286,235 @@
         .modal-title {
             font-size: 24px;
             font-weight: 600;
+            color: white;
+            margin: 0;
         }
 
-        .reply-textarea {
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        textarea {
             width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--separator);
-            background: var(--background);
-            color: var(--text-primary);
-            margin-bottom: 16px;
+            min-height: 150px;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--admin-border);
+            background: var(--admin-bg);
+            color: white;
+            font-size: 16px;
             resize: vertical;
+            margin-bottom: 16px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--admin-primary);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Navigation styles */
+        .nav-content {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .nav-content.active {
+            display: block;
+        }
+
+        /* Add styles for users section */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .user-card {
+            background: var(--admin-surface);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--admin-border);
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-info h3 {
+            margin: 0;
+            color: white;
+        }
+
+        .user-email {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .admin-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .admin-content-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="admin-sidebar">
-            <h2>Админ панель</h2>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="admin-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3h18v18H3z"/>
+                    <path d="M21 12H3M12 3v18"/>
+                </svg>
+                Админ панель
+            </div>
             <nav class="admin-nav">
-                <!-- Add navigation items here -->
+                <a href="#overview" class="nav-item active" data-section="overview">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    Обзор
+                </a>
+                <a href="#tickets" class="nav-item" data-section="tickets">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Тикеты
+                </a>
+                <a href="#users" class="nav-item" data-section="users">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Пользователи
+                </a>
+                <a href="#settings" class="nav-item" data-section="settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Настройки
+                </a>
             </nav>
+        </aside>
+        
+        <div class="admin-content-wrapper">
+            <div id="overview" class="nav-content active">
+                <div class="admin-header">
+                    <h1 class="page-title">Обзор системы</h1>
+                    <p class="page-subtitle">Управление тикетами и пользователями</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <div class="stat-label">Пользователей</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTickets">0</div>
+                        <div class="stat-label">Тикетов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="activeChats">0</div>
+                        <div class="stat-label">Активных чатов</div>
+                    </div>
+                </div>
+
+                <div class="tickets-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Последние тикеты</h2>
+                    </div>
+                    <div id="ticketsList">
+                        <!-- Tickets will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="tickets" class="nav-content">
+                <div class="admin-header">
+                    <h1 class="page-title">Тикеты поддержки</h1>
+                    <p class="page-subtitle">Управление обращениями пользователей</p>
+                </div>
+                <div class="tickets-section">
+                    <div id="ticketsList">
+                        <!-- Tickets will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="users" class="nav-content">
+                <div class="admin-header">
+                    <h1 class="page-title">Пользователи</h1>
+                    <p class="page-subtitle">Управление пользователями системы</p>
+                </div>
+                <div class="users-grid" id="usersList">
+                    <!-- Users will be loaded here -->
+                </div>
+            </div>
+
+            <div id="settings" class="nav-content">
+                <div class="admin-header">
+                    <h1 class="page-title">Настройки</h1>
+                    <p class="page-subtitle">Управление настройками системы</p>
+                </div>
+                <!-- Add settings content here -->
+            </div>
         </div>
-
-        <main class="admin-content">
-            <div class="admin-header">
-                <h1>Панель управления</h1>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalUsers">0</div>
-                    <div class="stat-label">Пользователей</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalTickets">0</div>
-                    <div class="stat-label">Тикетов</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="activeChats">0</div>
-                    <div class="stat-label">Активных чатов</div>
-                </div>
-            </div>
-
-            <h2>Тикеты поддержки</h2>
-            <div class="support-tickets" id="ticketsList">
-                <!-- Tickets will be loaded here -->
-            </div>
-        </main>
     </div>
 
-    <div class="reply-modal" id="replyModal">
+    <!-- Reply Modal -->
+    <div id="replyModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Ответить на тикет</h2>
+                <h3 class="modal-title">Ответить на тикет</h3>
             </div>
-            <textarea id="replyText" class="reply-textarea" placeholder="Введите ответ"></textarea>
-            <button class="ticket-button reply-button" onclick="sendReply()">Отправить</button>
-            <button class="ticket-button close-button" onclick="closeModal()">Отмена</button>
+            <div class="modal-body">
+                <textarea id="replyText" placeholder="Введите ваш ответ..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="sendReply()">Отправить</button>
+                <button class="btn btn-danger" onclick="closeModal()">Отмена</button>
+            </div>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script>
-        // Initialize Firebase (use your existing config)
+        // Your existing Firebase config and functions here
         const firebaseConfig = {
             apiKey: "AIzaSyD0ksObwMb6BBZN3WQBYDTLEKNHdG3fr3U",
             authDomain: "shitk-p.firebaseapp.com",
@@ -254,22 +528,6 @@
         firebase.initializeApp(firebaseConfig);
         const firestore = firebase.firestore();
 
-        // Check if user is admin
-        async function checkAdminAccess() {
-            const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
-            if (!userData.uid) {
-                window.location.href = '/';
-                return;
-            }
-
-            const userDoc = await firestore.collection('users').doc(userData.uid).get();
-            if (!userDoc.exists || !userDoc.data().isAdmin) {
-                window.location.href = '/dashboard';
-                return;
-            }
-        }
-
-        // Load support tickets
         async function loadTickets() {
             const ticketsSnapshot = await firestore.collection('support_tickets')
                 .orderBy('created_at', 'desc')
@@ -284,53 +542,67 @@
                 ticketElement.className = 'ticket';
                 ticketElement.innerHTML = `
                     <div class="ticket-header">
-                        <div class="ticket-subject">${ticket.subject}</div>
-                        <div class="ticket-time">${new Date(ticket.created_at?.toDate()).toLocaleString()}</div>
+                        <div class="ticket-info">
+                            <div class="ticket-subject">${ticket.subject}</div>
+                            <div class="ticket-meta">
+                                <span>${ticket.user_name}</span>
+                                <span>${new Date(ticket.created_at?.toDate()).toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <span class="ticket-status ${ticket.status === 'open' ? 'status-open' : 'status-closed'}">
+                            ${ticket.status === 'open' ? 'Открыт' : 'Закрыт'}
+                        </span>
                     </div>
                     <div class="ticket-message">${ticket.message}</div>
                     <div class="ticket-actions">
-                        <button class="ticket-button reply-button" onclick="replyToTicket('${doc.id}')">Ответить</button>
-                        <button class="ticket-button close-button" onclick="closeTicket('${doc.id}')">Закрыть</button>
+                        <button class="btn btn-primary" onclick="replyToTicket('${doc.id}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M21 15l-3-3 3-3"/>
+                                <path d="M18 12h3"/>
+                            </svg>
+                            Ответить
+                        </button>
+                        <button class="btn btn-danger" onclick="closeTicket('${doc.id}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12"/>
+                            </svg>
+                            Закрыть
+                        </button>
                     </div>
                 `;
                 ticketsList.appendChild(ticketElement);
             });
         }
 
-        // Initialize admin panel
-        async function initAdminPanel() {
-            await checkAdminAccess();
-            await loadTickets();
-            // Add more initialization logic here
-        }
-
-        // Start initialization
-        initAdminPanel().catch(console.error);
-
-        let currentTicketId = null;
-
+        // Your existing functions (replyToTicket, closeTicket, etc.)
         function replyToTicket(ticketId) {
             currentTicketId = ticketId;
-            const modal = document.getElementById('replyModal');
-            modal.style.display = 'block';
+            document.getElementById('replyModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('replyModal').style.display = 'none';
+            document.getElementById('replyText').value = '';
+            currentTicketId = null;
         }
 
         async function sendReply() {
-            const replyText = document.getElementById('replyText').value;
-            if (!replyText.trim() || !currentTicketId) return;
+            if (!currentTicketId) return;
+            
+            const replyText = document.getElementById('replyText').value.trim();
+            if (!replyText) return;
 
             try {
-                const ticketRef = firebase.firestore().collection('support_tickets').doc(currentTicketId);
-                await ticketRef.update({
-                    status: 'answered',
+                await firestore.collection('support_tickets').doc(currentTicketId).update({
                     reply: replyText,
-                    replied_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    status: 'answered',
+                    replied_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                document.getElementById('replyModal').style.display = 'none';
-                document.getElementById('replyText').value = '';
-                await loadTickets(); // Refresh tickets list
+                closeModal();
+                await loadTickets();
             } catch (error) {
                 console.error('Error sending reply:', error);
                 alert('Ошибка при отправке ответа');
@@ -341,25 +613,94 @@
             if (!confirm('Закрыть этот тикет?')) return;
 
             try {
-                const ticketRef = firebase.firestore().collection('support_tickets').doc(ticketId);
-                await ticketRef.update({
+                await firestore.collection('support_tickets').doc(ticketId).update({
                     status: 'closed',
-                    closed_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    closed_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                await loadTickets(); // Refresh tickets list
+                await loadTickets();
             } catch (error) {
                 console.error('Error closing ticket:', error);
                 alert('Ошибка при закрытии тикета');
             }
         }
 
-        // Add modal close function
-        function closeModal() {
-            document.getElementById('replyModal').style.display = 'none';
-            currentTicketId = null;
+        // Navigation handling
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all items
+                document.querySelectorAll('.nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                item.classList.add('active');
+                
+                // Hide all sections
+                document.querySelectorAll('.nav-content').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show selected section
+                const sectionId = item.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Update URL hash
+                window.location.hash = sectionId;
+            });
+        });
+
+        // Handle initial load and browser back/forward
+        function handleHashChange() {
+            const hash = window.location.hash.slice(1) || 'overview';
+            const navItem = document.querySelector(`[data-section="${hash}"]`);
+            if (navItem) {
+                navItem.click();
+            }
         }
+
+        window.addEventListener('hashchange', handleHashChange);
+        handleHashChange();
+
+        // Load users function
+        async function loadUsers() {
+            const usersSnapshot = await firebase.firestore()
+                .collection('users')
+                .get();
+
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+
+            usersSnapshot.forEach(doc => {
+                const user = doc.data();
+                const userElement = document.createElement('div');
+                userElement.className = 'user-card';
+                userElement.innerHTML = `
+                    <div class="user-header">
+                        <img src="${user.photo_url || 'https://vk.com/images/camera_200.png'}" 
+                             alt="${user.first_name}" 
+                             class="user-avatar">
+                        <div class="user-info">
+                            <h3>${user.first_name} ${user.last_name}</h3>
+                            <div class="user-email">${user.email || 'Нет email'}</div>
+                        </div>
+                    </div>
+                    <div class="user-meta">
+                        <div>ID: ${user.uid}</div>
+                        <div>Статус: ${user.isAdmin ? 'Администратор' : 'Пользователь'}</div>
+                    </div>
+                `;
+                usersList.appendChild(userElement);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTickets();
+            loadUsers();
+        });
     </script>
 </body>
 </html> 
