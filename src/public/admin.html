@@ -9,6 +9,8 @@
         .admin-container {
             display: flex;
             min-height: 100vh;
+            background: var(--background);
+            color: var(--text-primary);
         }
 
         .admin-sidebar {
@@ -25,33 +27,75 @@
             flex: 1;
             margin-left: 280px;
             padding: 24px;
+            max-width: 1200px;
         }
 
         .admin-header {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
             margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--separator);
+            border: 1px solid var(--separator);
         }
 
-        .support-tickets {
+        .stats-grid {
             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--separator);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(45deg, #0077FF, #00A3FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .ticket {
             background: var(--surface);
             border-radius: 12px;
-            padding: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
             border: 1px solid var(--separator);
+            transition: all 0.2s ease;
+        }
+
+        .ticket:hover {
+            transform: translateX(4px);
+            border-color: var(--accent);
         }
 
         .ticket-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 12px;
         }
 
         .ticket-subject {
+            font-size: 18px;
             font-weight: 600;
         }
 
@@ -63,6 +107,7 @@
         .ticket-message {
             color: var(--text-secondary);
             margin-bottom: 16px;
+            line-height: 1.5;
         }
 
         .ticket-actions {
@@ -78,6 +123,9 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .reply-button {
@@ -85,34 +133,60 @@
             color: white;
         }
 
+        .reply-button:hover {
+            background: #0066dd;
+        }
+
         .close-button {
             background: var(--error);
             color: white;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
+        .close-button:hover {
+            background: #dd3326;
         }
 
-        .stat-card {
+        .reply-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            padding: 24px;
+        }
+
+        .modal-content {
             background: var(--surface);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            margin: 64px auto;
             border: 1px solid var(--separator);
         }
 
-        .stat-value {
-            font-size: 32px;
-            font-weight: 600;
-            margin-bottom: 8px;
+        .modal-header {
+            margin-bottom: 24px;
         }
 
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 14px;
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .reply-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--separator);
+            background: var(--background);
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            resize: vertical;
         }
     </style>
 </head>
@@ -150,6 +224,17 @@
                 <!-- Tickets will be loaded here -->
             </div>
         </main>
+    </div>
+
+    <div class="reply-modal" id="replyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Ответить на тикет</h2>
+            </div>
+            <textarea id="replyText" class="reply-textarea" placeholder="Введите ответ"></textarea>
+            <button class="ticket-button reply-button" onclick="sendReply()">Отправить</button>
+            <button class="ticket-button close-button" onclick="closeModal()">Отмена</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -221,6 +306,60 @@
 
         // Start initialization
         initAdminPanel().catch(console.error);
+
+        let currentTicketId = null;
+
+        function replyToTicket(ticketId) {
+            currentTicketId = ticketId;
+            const modal = document.getElementById('replyModal');
+            modal.style.display = 'block';
+        }
+
+        async function sendReply() {
+            const replyText = document.getElementById('replyText').value;
+            if (!replyText.trim() || !currentTicketId) return;
+
+            try {
+                const ticketRef = firebase.firestore().collection('support_tickets').doc(currentTicketId);
+                await ticketRef.update({
+                    status: 'answered',
+                    reply: replyText,
+                    replied_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('replyModal').style.display = 'none';
+                document.getElementById('replyText').value = '';
+                await loadTickets(); // Refresh tickets list
+            } catch (error) {
+                console.error('Error sending reply:', error);
+                alert('Ошибка при отправке ответа');
+            }
+        }
+
+        async function closeTicket(ticketId) {
+            if (!confirm('Закрыть этот тикет?')) return;
+
+            try {
+                const ticketRef = firebase.firestore().collection('support_tickets').doc(ticketId);
+                await ticketRef.update({
+                    status: 'closed',
+                    closed_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await loadTickets(); // Refresh tickets list
+            } catch (error) {
+                console.error('Error closing ticket:', error);
+                alert('Ошибка при закрытии тикета');
+            }
+        }
+
+        // Add modal close function
+        function closeModal() {
+            document.getElementById('replyModal').style.display = 'none';
+            currentTicketId = null;
+        }
     </script>
 </body>
 </html> 
