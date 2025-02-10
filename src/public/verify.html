@@ -11,12 +11,28 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
+    <!-- Initialize Firebase -->
     <script>
-        // Проверка авторизации при загрузке страницы
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0ksObwMb6BBZN3WQBYDTLEKNHdG3fr3U",
+            authDomain: "shitk-p.firebaseapp.com",
+            databaseURL: "https://shitk-p-default-rtdb.firebaseio.com",
+            projectId: "shitk-p",
+            storageBucket: "shitk-p.firebasestorage.app",
+            messagingSenderId: "860946224153",
+            appId: "1:860946224153:web:cc1d2b7df27e434f9e0688"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <script>
+        // Единая проверка авторизации
         window.addEventListener('DOMContentLoaded', () => {
             const vkUser = localStorage.getItem('vk_user');
-            if (!vkUser) {
-                // Сохраняем текущий URL для редиректа после логина
+            const isLogged = localStorage.getItem('logged') === 'true';
+
+            if (!vkUser || !isLogged) {
                 localStorage.setItem('redirect_after_login', window.location.href);
                 window.location.href = '/';
                 return;
@@ -26,7 +42,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
             
-            // Проверяем, что токен предназначен для текущего пользователя
             if (userData.uid !== urlParams.get('uid')) {
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('error').innerHTML = `
@@ -37,7 +52,6 @@
                 return;
             }
 
-            // Отправляем запрос на верификацию с данными текущего пользователя
             verifyDeletion(token, userData.uid);
         });
 
