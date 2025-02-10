@@ -26,7 +26,7 @@
     </script>
 
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
             const uid = urlParams.get('uid');
@@ -36,23 +36,18 @@
                 return;
             }
 
-            // Получаем данные пользователя из Firestore
-            const firestore = firebase.firestore();
-            firestore.collection('users').doc(uid).get()
-                .then(doc => {
-                    if (!doc.exists) {
-                        throw new Error('Пользователь не найден');
-                    }
-                    const userData = doc.data();
-                    verifyDeletion(token, uid, userData);
-                })
-                .catch(error => {
-                    showError(error.message);
-                });
-        });
-
-        async function verifyDeletion(token, uid, userData) {
             try {
+                // Получаем данные пользователя из Firestore
+                const firestore = firebase.firestore();
+                const userDoc = await firestore.collection('users').doc(uid).get();
+                
+                if (!userDoc.exists) {
+                    throw new Error('Пользователь не найден');
+                }
+
+                const userData = userDoc.data();
+                
+                // Проверяем токен
                 const response = await fetch('/api/verify-deletion', {
                     method: 'POST',
                     headers: {
@@ -66,21 +61,21 @@
                     throw new Error(data.error || 'Ошибка верификации');
                 }
 
+                // Отображаем данные и форму подтверждения
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 
-                // Отображаем данные из Firestore
                 document.querySelector('.user-info').innerHTML = `
-                    <p><strong>Пользователь:</strong> ${userData.first_name} ${userData.last_name}</p>
-                    <p><strong>VK ID:</strong> ${userData.vk_id}</p>
-                    <p><strong>ID:</strong> ${userData.uid}</p>
+                    <p><strong>Пользователь:</strong> ${userData.first_name || ''} ${userData.last_name || ''}</p>
+                    <p><strong>VK ID:</strong> ${userData.vk_id || ''}</p>
+                    <p><strong>ID:</strong> ${userData.uid || ''}</p>
                 `;
 
                 setupConfirmButton(token, uid);
             } catch (error) {
                 showError(error.message);
             }
-        }
+        });
 
         function showError(message) {
             document.getElementById('loading').style.display = 'none';
@@ -95,6 +90,15 @@
         function setupConfirmButton(token, uid) {
             const confirmButton = document.getElementById('confirmButton');
             const confirmInput = document.getElementById('confirmInput');
+            const cancelButton = document.getElementById('cancel');
+
+            confirmInput.addEventListener('input', (e) => {
+                confirmButton.disabled = e.target.value !== 'УДАЛИТЬ';
+            });
+
+            cancelButton.addEventListener('click', () => {
+                window.location.href = '/dashboard';
+            });
 
             confirmButton.addEventListener('click', async () => {
                 if (confirmInput.value === 'УДАЛИТЬ') {
@@ -135,7 +139,7 @@
         <h1>Подтверждение удаления данных</h1>
         <div id="loading">
             <div class="spinner"></div>
-            <p>Проверка авторизации...</p>
+            <p>Проверка данных...</p>
         </div>
         <div id="content" style="display: none;">
             <div class="user-info"></div>
@@ -148,119 +152,5 @@
         </div>
         <div id="error" style="display: none;"></div>
     </div>
-
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        const uid = urlParams.get('uid');
-        const confirmInput = document.getElementById('confirmInput');
-        const confirmButton = document.getElementById('confirmButton');
-        const cancelButton = document.getElementById('cancel');
-
-        // Проверяем авторизацию пользователя
-        const userData = JSON.parse(localStorage.getItem('vk_user') || '{}');
-        
-        if (!userData.uid) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error').innerHTML = `
-                <div class="error-message">
-                    Необходимо авторизоваться для подтверждения удаления данных.
-                </div>
-                <button class="secondary-button" onclick="window.location.href='/?redirect=${encodeURIComponent(window.location.href)}'">
-                    Войти
-                </button>
-            `;
-            throw new Error('Unauthorized');
-        }
-
-        // Обработчик ввода текста подтверждения
-        confirmInput.addEventListener('input', (e) => {
-            confirmButton.disabled = e.target.value !== 'УДАЛИТЬ';
-        });
-
-        // Обработчик кнопки отмены
-        cancelButton.addEventListener('click', () => {
-            window.close();
-        });
-
-        // Проверяем токен и отображаем данные пользователя
-        fetch('/api/verify-deletion', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token, uid })
-        })
-        .then(async response => {
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Ошибка верификации');
-            }
-            return data;
-        })
-        .then(data => {
-            if (data.success) {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-                document.querySelector('.user-info').innerHTML = `
-                    <p><strong>Пользователь:</strong> ${data.userData.first_name} ${data.userData.last_name}</p>
-                    <p><strong>Email:</strong> ${data.userData.email || 'Не указан'}</p>
-                    <p><strong>ID:</strong> ${data.userData.uid}</p>
-                `;
-
-                // Setup confirmation button handler
-                confirmButton.addEventListener('click', () => {
-                    if (confirmInput.value === 'УДАЛИТЬ') {
-                        confirmButton.disabled = true;
-                        confirmButton.textContent = 'Удаление...';
-                        
-                        fetch('/api/confirm-deletion', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ token, uid })
-                        })
-                        .then(async response => {
-                            const result = await response.json();
-                            if (!response.ok) {
-                                throw new Error(result.error || 'Ошибка подтверждения');
-                            }
-                            return result;
-                        })
-                        .then(result => {
-                            if (result.success) {
-                                localStorage.removeItem('vk_user');
-                                window.location.href = '/deletion-confirmed';
-                            }
-                        })
-                        .catch(error => {
-                            document.getElementById('error').style.display = 'block';
-                            document.getElementById('error').innerHTML = `
-                                <div class="error-message">
-                                    ${error.message}
-                                </div>
-                            `;
-                            confirmButton.disabled = false;
-                            confirmButton.textContent = 'Подтвердить удаление';
-                        });
-                    }
-                });
-            }
-        })
-        .catch(error => {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error').innerHTML = `
-                <div class="error-message">
-                    ${error.message}
-                </div>
-                <button class="secondary-button" onclick="window.location.href='/'">
-                    Вернуться на главную
-                </button>
-            `;
-        });
-    </script>
 </body>
 </html> 
