@@ -5,9 +5,10 @@ const axios = require('axios');
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
 
-// Инициализация Firebase Admin
+// Инициализация Firebase Admin SDK
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://shitk-p-default-rtdb.firebaseio.com/"
 });
 
 const db = admin.firestore();
