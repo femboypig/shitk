@@ -82,20 +82,16 @@
                             })
                         })
                         .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
+                        .then(serverData => {
+                            if (serverData.success) {
                                 // Объединяем данные от VK и сервера
-                                const combinedUserData = {
+                                const userData = {
                                     ...vkUserData,
-                                    ...data.user
+                                    ...serverData.user
                                 };
                                 
-                                // Save user data to localStorage
-                                localStorage.setItem('vk_user', JSON.stringify(combinedUserData));
-                                localStorage.setItem('logged', 'true');
-                                
                                 // Save user data to Firestore
-                                return saveUserToFirestore(combinedUserData)
+                                return saveUserToFirestore(userData)
                                     .then(() => {
                                         const redirectPath = localStorage.getItem('redirect_after_login');
                                         if (redirectPath) {
@@ -106,7 +102,7 @@
                                         }
                                     });
                             } else {
-                                throw new Error(data.error || 'Authentication failed');
+                                throw new Error(serverData.error || 'Authentication failed');
                             }
                         })
                         .catch(error => {
