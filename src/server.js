@@ -160,68 +160,58 @@ app.post('/api/verify-deletion', async (req, res) => {
             });
         }
 
-        // Get reference to Firestore
+        // Initialize Firestore
         const db = admin.firestore();
         
-        try {
-            // Проверяем существование токена в Firebase
-            const tokenDoc = await db.collection('verification_tokens')
-                .doc(uid)
-                .get();
+        // Проверяем существование токена в Firebase
+        const tokenDoc = await db.collection('verification_tokens')
+            .doc(uid)
+            .get();
 
-            if (!tokenDoc.exists) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Недействительный токен верификации'
-                });
-            }
-
-            const tokenData = tokenDoc.data();
-
-            // Проверяем соответствие токена
-            if (tokenData.token !== token) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Неверный токен верификации'
-                });
-            }
-
-            // Проверяем срок действия токена (30 минут)
-            const tokenTimestamp = tokenData.created_at.toDate();
-            const tokenAge = Date.now() - tokenTimestamp.getTime();
-            
-            if (tokenAge > 30 * 60 * 1000) {
-                await tokenDoc.ref.delete();
-                return res.status(400).json({
-                    success: false,
-                    error: 'Срок действия токена истек'
-                });
-            }
-
-            // Return success response with user data
-            res.json({ 
-                success: true,
-                userData: {
-                    first_name: userData.first_name,
-                    last_name: userData.last_name,
-                    email: userData.email,
-                    uid: uid
-                }
-            });
-
-        } catch (firestoreError) {
-            console.error('Firestore error:', firestoreError);
-            return res.status(500).json({
+        if (!tokenDoc.exists) {
+            return res.status(400).json({
                 success: false,
-                error: 'Ошибка при проверке токена'
+                error: 'Недействительный токен верификации'
             });
         }
+
+        const tokenData = tokenDoc.data();
+
+        // Проверяем соответствие токена
+        if (tokenData.token !== token) {
+            return res.status(400).json({
+                success: false,
+                error: 'Неверный токен верификации'
+            });
+        }
+
+        // Проверяем срок действия токена (30 минут)
+        const tokenTimestamp = tokenData.created_at;
+        const tokenAge = Date.now() - (tokenTimestamp._seconds * 1000);
+        
+        if (tokenAge > 30 * 60 * 1000) {
+            await tokenDoc.ref.delete();
+            return res.status(400).json({
+                success: false,
+                error: 'Срок действия токена истек'
+            });
+        }
+
+        // Return success response with user data
+        res.json({ 
+            success: true,
+            userData: {
+                first_name: userData.first_name,
+                last_name: userData.last_name,
+                uid: uid
+            }
+        });
 
     } catch (error) {
         console.error('Verification error:', error);
         res.status(500).json({
             success: false,
-            error: 'Ошибка верификации: ' + error.message
+            error: 'Ошибка при проверке токена'
         });
     }
 });
