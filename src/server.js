@@ -126,7 +126,122 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+app.get('/terms', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+});
 
+app.get('/privacy', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+// Эндпоинт для верификации токена удаления
+app.post('/api/verify-deletion', async (req, res) => {
+    try {
+        const { token, uid, userData } = req.body;
+
+        // Проверяем существование токена в Firebase
+        const tokenDoc = await db.collection('verification_tokens')
+            .doc(uid)
+            .get();
+
+        if (!tokenDoc.exists) {
+            return res.status(400).json({
+                success: false,
+                error: 'Недействительный токен верификации'
+            });
+        }
+
+        const tokenData = tokenDoc.data();
+
+        // Проверяем срок действия токена (30 минут)
+        const tokenAge = Date.now() - tokenData.created_at.toDate().getTime();
+        if (tokenAge > 30 * 60 * 1000) {
+            await tokenDoc.ref.delete();
+            return res.status(400).json({
+                success: false,
+                error: 'Срок действия токена истек'
+            });
+        }
+
+        // Проверяем статус токена
+        if (tokenData.status !== 'pending') {
+            return res.status(400).json({
+                success: false,
+                error: 'Токен уже был использован'
+            });
+        }
+
+        // Проверяем соответствие данных пользователя
+        const userDoc = await db.collection('users')
+            .doc(uid)
+            .get();
+
+        if (!userDoc.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Пользователь не найден'
+            });
+        }
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('Verification error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка верификации'
+        });
+    }
+});
+
+// Эндпоинт для подтверждения удаления
+app.post('/api/confirm-deletion', async (req, res) => {
+    try {
+        const { token, uid } = req.body;
+
+        // Проверяем токен еще раз
+        const tokenDoc = await db.collection('verification_tokens')
+            .doc(uid)
+            .get();
+
+        if (!tokenDoc.exists || tokenDoc.data().status !== 'pending') {
+            return res.status(400).json({
+                success: false,
+                error: 'Недействительный токен'
+            });
+        }
+
+        // Начинаем транзакцию для атомарного обновления
+        await db.runTransaction(async (transaction) => {
+            // Обновляем статус токена
+            transaction.update(tokenDoc.ref, { status: 'completed' });
+
+            // Создаем запись о запросе на удаление
+            const deletionRef = db.collection('deletion_requests').doc(uid);
+            transaction.set(deletionRef, {
+                user_id: uid,
+                requested_at: admin.firestore.FieldValue.serverTimestamp(),
+                status: 'pending',
+                token: token
+            });
+        });
+
+        // Отправляем уведомление в Telegram через бота
+        const bot_token = process.env.BOT_TOKEN;
+        await axios.post(`https://api.telegram.org/bot${bot_token}/sendMessage`, {
+            chat_id: uid,
+            text: "✅ Удаление данных подтверждено.\nВаши данные будут удалены в течение 24 часов."
+        });
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error('Confirmation error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка подтверждения'
+        });
+    }
+});
 // Support endpoint
 app.post('/api/support', async (req, res) => {
     try {

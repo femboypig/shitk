@@ -127,3 +127,77 @@ button img {
     width: 20px;
     height: 20px;
 } 
+.verification-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 32px;
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.verification-container h1 {
+    color: var(--text-primary);
+    font-size: 24px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.user-info {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.user-info p {
+    margin: 8px 0;
+    color: var(--text-primary);
+}
+
+.danger-button {
+    background: #FF3B30;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 12px;
+    transition: background 0.2s;
+}
+
+.danger-button:hover {
+    background: #FF2419;
+}
+
+.secondary-button {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+}
+
+.secondary-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#loading, #error {
+    text-align: center;
+    color: var(--text-primary);
+    padding: 20px;
+}
+
+.error-message {
+    color: #FF3B30;
+    background: rgba(255, 59, 48, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}

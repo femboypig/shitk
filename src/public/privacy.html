@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Политика конфиденциальности | IDENTIFY</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        :root {
+            --background: #0F0F0F;
+            --surface: #141414;
+            --surface-hover: #222222;
+            --accent: #0077FF;
+            --accent-gradient: linear-gradient(135deg, #0077FF 0%, #45B6FE 100%);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.48);
+            --separator: rgba(255, 255, 255, 0.08);
+        }
+
+        .legal-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            min-height: 100vh;
+            background: var(--surface);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 32px;
+            padding: 8px 16px;
+            background: rgba(0, 119, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(0, 119, 255, 0.15);
+        }
+
+        .legal-header {
+            text-align: center;
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .legal-header img {
+            border: 1px solid #000000;
+            border-radius: 16px;
+            width: 240px;
+            height: auto;
+            margin-bottom: 24px;
+            padding: 10px;
+            background: #ffffff;
+        }
+
+        .legal-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .legal-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .legal-section {
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 32px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .legal-section:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .section-title h2 {
+            font-size: 28px;
+            color: var(--text-primary);
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .section-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .section-content p {
+            margin-bottom: 24px;
+        }
+
+        .section-content ul {
+            padding-left: 28px;
+            margin-bottom: 24px;
+        }
+
+        .section-content li {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .section-content li::before {
+            position: absolute;
+            left: -28px;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .legal-container {
+                padding: 24px 16px;
+            }
+
+            .legal-header img {
+                width: 180px;
+            }
+
+            .legal-title {
+                font-size: 28px;
+            }
+
+            .legal-section {
+                padding: 32px 24px;
+                border-radius: 20px;
+            }
+
+            .section-title h2 {
+                font-size: 24px;
+            }
+        }
+        .footer {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--separator);
+            text-align: center;
+        }
+        
+        .footer img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .footer p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            }
+
+            .highlight-brand {
+                color: #7C3AED; /* Фиолетовый */
+                font-weight: 600;
+            }
+
+            .highlight-important {
+                color: #DC2626; /* Красный */
+                font-weight: 600;
+            }
+
+            .highlight-info {
+                color: #2563EB; /* Синий */
+                font-weight: 600;
+            }
+
+            .highlight-box {
+                background: rgba(124, 58, 237, 0.1); /* Светло-фиолетовый фон */
+                padding: 0 4px;
+                border-radius: 4px;
+                font-weight: 500;
+            }
+
+            .highlight-underline {
+                border-bottom: 2px solid #7C3AED;
+                padding-bottom: 1px;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="legal-container">
+        <a href="/" class="back-link">
+            На главную
+        </a>
+
+        <header class="legal-header">
+            <img src="/fullid.svg" alt="IDENTIFY">
+            <h1 class="legal-title"><span class="highlight-brand">Политика конфиденциальности</span></h1>
+            <div class="legal-date">Последнее обновление: <span class="highlight-info">1 марта 2024 г.</span></div>
+        </header>
+
+        <main>
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>1. Общие положения</h2>
+                </div>
+                <div class="section-content">
+                    <p>Эта <span class="highlight-underline">Политика конфиденциальности</span> объясняет, как <span class="highlight-brand">IDENTIFY</span> обрабатывает ваши <span class="highlight-important">персональные данные</span> при использовании нашего приложения.</p>
+                    <p>Используя <span class="highlight-brand">IDENTIFY</span>, вы принимаете условия этой Политики конфиденциальности.</p>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>2. Какие данные мы собираем</h2>
+                </div>
+                <div class="section-content">
+                    <p>При использовании <span class="highlight-brand">IDENTIFY</span> мы получаем:</p>
+                    <ul>
+                        <li>Основную информацию из вашего профиля <span class="highlight-box">VK ID</span> (<span class="highlight-important">имя, фамилию и фото</span>)</li>
+                        <li><span class="highlight-info">Данные об использовании приложения</span> и взаимодействии с его функциями</li>
+                        <li>Техническую информацию об устройстве и операционной системе</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>3. Как мы используем данные</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-underline">Ваши данные помогают нам:</span></p>
+                    <ul>
+                        <li><span class="highlight-info">Обеспечивать работу и улучшать функции приложения</span></li>
+                        <li>Делать ваш опыт использования более <span class="highlight-box">персонализированным</span></li>
+                        <li>Анализировать и оптимизировать производительность</li>
+                        <li><span class="highlight-important">Защищать безопасность пользователей</span> и предотвращать нарушения</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>4. Передача данных</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-important">Мы не продаем и не передаем ваши персональные данные третьим лицам.</span> Исключения:</p>
+                    <ul>
+                        <li><span class="highlight-box">Если этого требует законодательство</span></li>
+                        <li>Когда вы дали нам <span class="highlight-info">явное согласие</span></li>
+                        <li>В случаях защиты прав, собственности или безопасности <span class="highlight-brand">IDENTIFY</span> и наших пользователей</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>5. Ваши права</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-underline">У вас есть право:</span></p>
+                    <ul>
+                        <li><span class="highlight-info">Запросить копию ваших персональных данных</span></li>
+                        <li>Исправить неточную информацию</li>
+                        <li><span class="highlight-important">Удалить свои данные</span> из нашей системы</li>
+                        <li><span class="highlight-box">Отозвать согласие на обработку данных в любой момент</span></li>
+                    </ul>
+                </div>
+            </section>
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>6. Изменения в политике</h2>
+                </div>
+                <div class="section-content">
+                    <p>Мы можем <span class="highlight-info">обновлять эту Политику конфиденциальности</span>. При существенных изменениях мы уведомим вас через приложение или по электронной почте.</p>
+                    <p>Продолжая пользоваться <span class="highlight-brand">IDENTIFY</span> после изменений, вы соглашаетесь с <span class="highlight-box">обновленными условиями</span>.</p>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>7. Удаление данных</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-underline">Чтобы удалить свои данные из IDENTIFY:</span></p>
+                    <ul>
+                        <li>Откройте нашего бота в Telegram <span class="highlight-box">@identify_supportbot</span></li>
+                        <li>Отправьте команду <span class="highlight-info">/delete_data</span></li>
+                        <li>Подтвердите свое намерение, следуя инструкциям бота</li>
+                        <li>После подтверждения, все ваши данные будут <span class="highlight-important">безвозвратно удалены</span> в течение 24 часов</li>
+                    </ul>
+                    <p><span class="highlight-box">Важно:</span> После удаления данных восстановить их будет невозможно.</p>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>8. Связаться с нами</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-underline">Если у вас остались вопросы о том, как мы обрабатываем ваши данные:</span></p>
+                    <ul>
+                        <li>Напишите нам на <span class="highlight-box">harimassaa@gmail.com</span></li>
+                        <li>Свяжитесь с нашей поддержкой в Telegram: <span class="highlight-box">@identify_supportbot</span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <img src="/fullidwhite.svg" alt="IDENTIFY">
+            <p>© 2025 <span class="highlight-brand">IDENTIFY</span>. Все права защищены.</p>
+        </footer>
+    </div>
+</body>
+</html> 

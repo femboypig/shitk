@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Условия использования | IDENTIFY</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        :root {
+            --background: #0F0F0F;
+            --surface: #141414;
+            --surface-hover: #222222;
+            --accent: #0077FF;
+            --accent-gradient: linear-gradient(135deg, #0077FF 0%, #45B6FE 100%);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.48);
+            --separator: rgba(255, 255, 255, 0.08);
+        }
+
+        .legal-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            min-height: 100vh;
+            background: var(--surface);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 32px;
+            padding: 8px 16px;
+            background: rgba(0, 119, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(0, 119, 255, 0.15);
+        }
+
+        .legal-header {
+            text-align: center;
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .legal-header img {
+            border: 1px solid #000000;
+            border-radius: 16px;
+            width: 240px;
+            height: auto;
+            margin-bottom: 24px;
+            padding: 10px;
+            background: #ffffff;
+        }
+
+        .legal-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .legal-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .legal-section {
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 32px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .legal-section:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .section-title h2 {
+            font-size: 28px;
+            color: var(--text-primary);
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .section-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .section-content p {
+            margin-bottom: 24px;
+        }
+
+        .section-content ul {
+            padding-left: 28px;
+            margin-bottom: 24px;
+            list-style: none;
+        }
+
+        .section-content li {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .section-content li::before {
+            content: "";
+            position: absolute;
+            left: -28px;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .highlight-brand {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .highlight-info {
+            color: #45B6FE;
+            font-weight: 500;
+        }
+
+        .highlight-important {
+            color: #FF3B30;
+            font-weight: 500;
+        }
+
+        .highlight-box {
+            background: rgba(124, 58, 237, 0.1);
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .highlight-underline {
+            border-bottom: 2px solid #7C3AED;
+            padding-bottom: 1px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--separator);
+        }
+
+        .footer img {
+            width: 120px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .legal-container {
+                padding: 24px 16px;
+            }
+
+            .legal-section {
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .legal-title {
+                font-size: 28px;
+            }
+
+            .section-title h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="legal-container">
+        <a href="/" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            На главную
+        </a>
+
+        <header class="legal-header">
+            <img src="/fullid.svg" alt="IDENTIFY">
+            <h1 class="legal-title"><span class="highlight-brand">Условия использования</span></h1>
+            <div class="legal-date">Последнее обновление: <span class="highlight-info">1 марта 2024 г.</span></div>
+        </header>
+
+        <main>
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>1. Общие положения</h2>
+                </div>
+                <div class="section-content">
+                    <p>Используя <span class="highlight-brand">IDENTIFY</span>, вы соглашаетесь с настоящими <span class="highlight-underline">условиями использования</span>. Пожалуйста, внимательно ознакомьтесь с ними.</p>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>2. Использование сервиса</h2>
+                </div>
+                <div class="section-content">
+                    <ul>
+                        <li><span class="highlight-box">Регистрация:</span> <span class="highlight-info">Для использования сервиса требуется авторизация через VK ID</span></li>
+                        <li><span class="highlight-box">Безопасность:</span> <span class="highlight-important">Храните данные для входа в безопасном месте</span></li>
+                        <li><span class="highlight-box">Ограничения:</span> Запрещено использовать сервис для нарушения законов РФ</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>3. Ответственность</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-important">Мы не несем ответственности за:</span></p>
+                    <ul>
+                        <li>Действия третьих лиц</li>
+                        <li>Технические сбои в работе сервиса</li>
+                        <li>Потерю данных по независящим от нас причинам</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>4. Пользовательские обязательства</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-underline">Используя наш сервис, вы обязуетесь:</span></p>
+                    <ul>
+                        <li><span class="highlight-important">Предоставлять достоверную информацию</span> при регистрации</li>
+                        <li>Соблюдать <span class="highlight-box">правила использования</span> сервиса</li>
+                        <li>Не нарушать права других пользователей</li>
+                        <li>Сообщать о замеченных нарушениях через службу поддержки</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>5. Запрещенные действия</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-important">При использовании сервиса запрещается:</span></p>
+                    <ul>
+                        <li>Использовать сервис для нарушения законодательства РФ</li>
+                        <li>Распространять <span class="highlight-box">вредоносное программное обеспечение</span></li>
+                        <li>Пытаться получить <span class="highlight-important">несанкционированный доступ</span> к данным</li>
+                        <li>Использовать автоматизированные скрипты без согласования</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>6. Изменения в условиях</h2>
+                </div>
+                <div class="section-content">
+                    <p>Мы оставляем за собой право <span class="highlight-info">изменять эти условия использования</span>. При существенных изменениях мы уведомим вас через приложение или по электронной почте.</p>
+                    <p>Продолжая пользоваться <span class="highlight-brand">IDENTIFY</span> после изменений, вы соглашаетесь с <span class="highlight-box">обновленными условиями</span>.</p>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>7. Прекращение доступа</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-underline">Мы можем ограничить или прекратить ваш доступ к сервису если:</span></p>
+                    <ul>
+                        <li>Вы нарушаете <span class="highlight-important">условия использования</span></li>
+                        <li>Ваши действия создают <span class="highlight-box">риск для других пользователей</span></li>
+                        <li>Этого требует <span class="highlight-info">законодательство</span></li>
+                        <li>Вы используете сервис для <span class="highlight-important">мошеннических действий</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <div class="section-title">
+                    <h2>8. Связаться с нами</h2>
+                </div>
+                <div class="section-content">
+                    <p><span class="highlight-underline">Если у вас остались вопросы об условиях использования:</span></p>
+                    <ul>
+                        <li>Напишите нам на <span class="highlight-box">harimassaa@gmail.com</span></li>
+                        <li>Свяжитесь с нашей поддержкой в Telegram: <span class="highlight-box">@identify_supportbot</span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <img src="/fullidwhite.svg" alt="IDENTIFY">
+            <p>© 2025 <span class="highlight-brand">IDENTIFY</span>. Все права защищены.</p>
+        </footer>
+    </div>
+</body>
+</html> 
