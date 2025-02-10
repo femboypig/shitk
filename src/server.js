@@ -231,11 +231,12 @@ app.post('/api/confirm-deletion', async (req, res) => {
         });
 
         // Отправляем уведомление в Telegram через бота
-        const bot_token = process.env.BOT_TOKEN;
+        const bot_token = '7623000540:AAHNX-KCHWXq6XIV54ruYlDAWKydvtsUc3g';
         await axios.post(`https://api.telegram.org/bot${bot_token}/sendMessage`, {
             chat_id: uid,
             text: "✅ Удаление данных подтверждено.\nВаши данные будут удалены в течение 24 часов."
         });
+
 
         res.json({ success: true });
 

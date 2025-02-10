@@ -161,9 +161,10 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await show_main_menu(update, context)
         elif query.data in ['privacy', 'terms']:
             urls = {
-                'privacy': 'https://shit-k.vercel.app/privacy',
-                'terms': 'https://shit-k.vercel.app/terms'
+                'privacy': 'https://shitk-p.vercel.app/privacy',
+                'terms': 'https://shitk-p.vercel.app/terms'
             }
+
             await query.edit_message_text(
                 f"Вы можете ознакомиться с документом по ссылке:\n"
                 f"🔗 <a href='{urls[query.data]}'>{urls[query.data]}</a>",
@@ -189,7 +190,7 @@ async def delete_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         'status': 'pending'
     })
     
-    verification_url = f"https://shit-k.vercel.app/verify?token={verification_token}&uid={user_id}"
+    verification_url = f"https://shitk-p.vercel.app/verify?token={verification_token}&uid={user_id}"
     
     keyboard = [
         [InlineKeyboardButton("Подтвердить на сайте", url=verification_url)],
