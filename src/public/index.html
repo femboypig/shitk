@@ -63,6 +63,15 @@
                     function vkidOnSuccess(data) {
                         console.log('Raw VK data received:', data);
                         
+                        // Преобразуем данные из VK в нужный формат
+                        const vkUserData = {
+                            user_id: data.user_id,
+                            first_name: data.first_name || '',
+                            last_name: data.last_name || '',
+                            photo_url: data.photo_url || '',
+                            email: data.email || ''
+                        };
+                        
                         fetch('/auth/vk/login', {
                             method: 'POST',
                             headers: {
@@ -75,14 +84,19 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
+                                // Объединяем данные от VK и сервера
+                                const combinedUserData = {
+                                    ...vkUserData,
+                                    ...data.user
+                                };
+                                
                                 // Save user data to localStorage
-                                localStorage.setItem('vk_user', JSON.stringify(data.user));
+                                localStorage.setItem('vk_user', JSON.stringify(combinedUserData));
                                 localStorage.setItem('logged', 'true');
                                 
                                 // Save user data to Firestore
-                                return saveUserToFirestore(data.user)
+                                return saveUserToFirestore(combinedUserData)
                                     .then(() => {
-                                        // Проверяем редирект после успешной авторизации
                                         const redirectPath = localStorage.getItem('redirect_after_login');
                                         if (redirectPath) {
                                             localStorage.removeItem('redirect_after_login');
