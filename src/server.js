@@ -21,11 +21,12 @@ const serviceAccount = {
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
     admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://shitk-p-default-rtdb.firebaseio.com/"
     });
 }
 
-const db = admin.firestore();
+const db = admin.database();
 
 // Initialize express app
 const app = express();
@@ -175,21 +176,17 @@ app.post('/api/verify-deletion', async (req, res) => {
         }
 
         try {
-            // Проверяем существование токена в Firebase
-            const tokenDoc = await db.collection('verification_tokens')
-                .doc(uid)
-                .get();
+            // Проверяем существование токена в Realtime Database
+            const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
+            const tokenData = tokenSnapshot.val();
 
-            if (!tokenDoc.exists) {
+            if (!tokenData) {
                 return res.status(400).json({
                     success: false,
                     error: 'Недействительный токен верификации'
                 });
             }
 
-            const tokenData = tokenDoc.data();
-
-            // Проверяем соответствие токена
             if (tokenData.token !== token) {
                 return res.status(400).json({
                     success: false,
@@ -198,18 +195,17 @@ app.post('/api/verify-deletion', async (req, res) => {
             }
 
             // Получаем данные пользователя
-            const userDoc = await db.collection('users').doc(uid).get();
-            const userData = userDoc.exists ? userDoc.data() : null;
+            const userSnapshot = await db.ref(`users/${uid}`).once('value');
+            const userData = userSnapshot.val();
 
-            // Отправляем успешный ответ с данными пользователя
             res.json({
                 success: true,
                 message: 'Токен верифицирован успешно',
                 userData: userData
             });
 
-        } catch (firestoreError) {
-            console.error('Firestore operation error:', firestoreError);
+        } catch (dbError) {
+            console.error('Database operation error:', dbError);
             res.status(500).json({
                 success: false,
                 error: 'Ошибка при проверке токена'
