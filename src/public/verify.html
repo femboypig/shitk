@@ -68,18 +68,24 @@
             },
             body: JSON.stringify({ token, uid, userData })
         })
-        .then(response => response.json())
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Ошибка верификации');
+            }
+            return data;
+        })
         .then(data => {
             if (data.success) {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 document.querySelector('.user-info').innerHTML = `
-                    <p><strong>Пользователь:</strong> ${userData.first_name} ${userData.last_name}</p>
-                    <p><strong>Email:</strong> ${userData.email}</p>
-                    <p><strong>ID:</strong> ${userData.uid}</p>
+                    <p><strong>Пользователь:</strong> ${data.userData.first_name} ${data.userData.last_name}</p>
+                    <p><strong>Email:</strong> ${data.userData.email || 'Не указан'}</p>
+                    <p><strong>ID:</strong> ${data.userData.uid}</p>
                 `;
 
-                // Обработчик подтверждения удаления
+                // Setup confirmation button handler
                 confirmButton.addEventListener('click', () => {
                     if (confirmInput.value === 'УДАЛИТЬ') {
                         confirmButton.disabled = true;
@@ -92,16 +98,21 @@
                             },
                             body: JSON.stringify({ token, uid })
                         })
-                        .then(response => response.json())
+                        .then(async response => {
+                            const result = await response.json();
+                            if (!response.ok) {
+                                throw new Error(result.error || 'Ошибка подтверждения');
+                            }
+                            return result;
+                        })
                         .then(result => {
                             if (result.success) {
                                 localStorage.removeItem('vk_user');
                                 window.location.href = '/deletion-confirmed';
-                            } else {
-                                throw new Error(result.error || 'Ошибка подтверждения');
                             }
                         })
                         .catch(error => {
+                            document.getElementById('error').style.display = 'block';
                             document.getElementById('error').innerHTML = `
                                 <div class="error-message">
                                     ${error.message}
@@ -112,8 +123,6 @@
                         });
                     }
                 });
-            } else {
-                throw new Error(data.error || 'Ошибка верификации');
             }
         })
         .catch(error => {
