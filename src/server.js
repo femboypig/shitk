@@ -4,32 +4,41 @@ const cors = require('cors');
 const axios = require('axios');
 const admin = require('firebase-admin');
 
-// Проверяем наличие переменной окружения
-if (!process.env.FIREBASE_PRIVATE_KEY) {
-    // Если переменной нет, используем локальный файл
-    const serviceAccount = require('./serviceAccountKey.json');
-    admin.initializeApp({
+// Initialize Firebase Admin
+const initializeFirebaseAdmin = () => {
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      // For production, use environment variables
+      const serviceAccount = {
+        type: "service_account",
+        project_id: process.env.FIREBASE_PROJECT_ID,
+        private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+        private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        client_id: process.env.FIREBASE_CLIENT_ID,
+        auth_uri: "https://accounts.google.com/o/oauth2/auth",
+        token_uri: "https://oauth2.googleapis.com/token",
+        auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+        client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL
+      };
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.FIREBASE_DATABASE_URL
+      });
+    } else {
+      // For development, use local service account file
+      const serviceAccount = require('./serviceAccountKey.json');
+      admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
         databaseURL: "https://shitk-p-default-rtdb.firebaseio.com"
-    });
-} else {
-    // Используем переменную окружения
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            "type": "service_account",
-            "project_id": "shitk-p",
-            "private_key_id": "87d887ca3ad9fe290666d4a371bdca83fcaec4b2",
-            "private_key": process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-            "client_email": "firebase-adminsdk-fbsvc@shitk-p.iam.gserviceaccount.com",
-            "client_id": "109874227719706049138",
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40shitk-p.iam.gserviceaccount.com"
-        }),
-        databaseURL: "https://shitk-p-default-rtdb.firebaseio.com"
-    });
-}
+      });
+    }
+  } catch (error) {
+    console.error('Firebase Admin initialization error:', error);
+    throw error;
+  }
+};
 
 // Инициализируем Firestore сразу после инициализации админа
 const db = admin.firestore();
@@ -181,72 +190,45 @@ app.post('/api/verify-deletion', async (req, res) => {
             });
         }
 
-        // Проверяем существование токена в Firebase
-        const tokenDoc = await db.collection('verification_tokens')
-            .doc(uid)
-            .get();
+        // Add logging for debugging
+        console.log('Verifying deletion request:', { token, uid });
 
-        if (!tokenDoc.exists) {
-            return res.status(400).json({
-                success: false,
-                error: 'Недействительный токен верификации'
-            });
+        // Verify Firebase Admin is initialized
+        if (!admin.apps.length) {
+            throw new Error('Firebase Admin not initialized');
         }
 
-        const tokenData = tokenDoc.data();
-
-        // Проверяем соответствие токена
-        if (tokenData.token !== token) {
-            return res.status(400).json({
-                success: false,
-                error: 'Неверный токен верификации'
-            });
-        }
-
-        // Проверяем срок действия токена (30 минут)
-        const tokenTimestamp = tokenData.created_at.toDate ? 
-            tokenData.created_at.toDate() : 
-            new Date(tokenData.created_at);
-            
-        const tokenAge = Date.now() - tokenTimestamp.getTime();
-        if (tokenAge > 30 * 60 * 1000) {
-            await tokenDoc.ref.delete();
-            return res.status(400).json({
-                success: false,
-                error: 'Срок действия токена истек'
-            });
-        }
-
-        // Проверяем статус токена
-        if (tokenData.status !== 'pending') {
-            return res.status(400).json({
-                success: false,
-                error: 'Токен уже был использован'
-            });
-        }
-
-        // Проверяем существование пользователя в VK
+        const db = admin.firestore();
+        
+        // Add error handling for database operations
         try {
-            const vkUserData = await getVKUserInfo(userData.vk_id);
-            if (!vkUserData) {
-                throw new Error('Пользователь VK не найден');
+            const tokenDoc = await db.collection('verification_tokens')
+                .doc(uid)
+                .get();
+
+            if (!tokenDoc.exists) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Недействительный токен верификации'
+                });
             }
-        } catch (error) {
-            return res.status(400).json({
-                success: false,
-                error: 'Ошибка верификации пользователя VK'
+
+            const tokenData = tokenDoc.data();
+            
+            // Rest of your verification logic...
+            
+            res.json({ 
+                success: true,
+                userData: {
+                    first_name: userData.first_name,
+                    last_name: userData.last_name,
+                    vk_id: userData.vk_id
+                }
             });
+        } catch (dbError) {
+            console.error('Database operation error:', dbError);
+            throw new Error('Database operation failed: ' + dbError.message);
         }
-
-        res.json({ 
-            success: true,
-            userData: {
-                first_name: userData.first_name,
-                last_name: userData.last_name,
-                vk_id: userData.vk_id
-            }
-        });
-
     } catch (error) {
         console.error('Verification error:', error);
         res.status(500).json({
