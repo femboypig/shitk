@@ -133,6 +133,11 @@ app.get('/terms', (req, res) => {
 app.get('/privacy', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
 });
+app.get('/verify', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'verify.html'));
+});
+
+
 // Эндпоинт для верификации токена удаления
 app.post('/api/verify-deletion', async (req, res) => {
     try {
