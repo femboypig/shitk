@@ -174,6 +174,11 @@ app.post('/api/verify-deletion', async (req, res) => {
             });
         }
 
+        // Добавим логирование для отладки
+        console.log('Attempting to verify token:', { token, uid });
+        console.log('Firebase Admin initialized:', !!admin.apps.length);
+        console.log('Firestore instance:', !!db);
+
         try {
             // Проверяем существование токена в Firebase
             const tokenDoc = await db.collection('verification_tokens')
@@ -188,6 +193,7 @@ app.post('/api/verify-deletion', async (req, res) => {
             }
 
             const tokenData = tokenDoc.data();
+            console.log('Token data from Firestore:', tokenData);
 
             // Проверяем соответствие токена
             if (tokenData.token !== token) {
@@ -197,31 +203,15 @@ app.post('/api/verify-deletion', async (req, res) => {
                 });
             }
 
-            // Проверяем срок действия токена (30 минут)
-            const tokenTimestamp = tokenData.created_at;
-            const tokenAge = Date.now() - (tokenTimestamp._seconds * 1000);
-            
-            if (tokenAge > 30 * 60 * 1000) {
-                await tokenDoc.ref.delete();
-                return res.status(400).json({
-                    success: false,
-                    error: 'Срок действия токена истек'
-                });
-            }
-
-            // Return success response
-            return res.json({ 
+            // Отправляем успешный ответ
+            res.json({
                 success: true,
-                userData: {
-                    first_name: userData.first_name,
-                    last_name: userData.last_name,
-                    uid: uid
-                }
+                message: 'Токен верифицирован успешно'
             });
 
         } catch (firestoreError) {
-            console.error('Firestore error:', firestoreError);
-            return res.status(500).json({
+            console.error('Firestore operation error:', firestoreError);
+            res.status(500).json({
                 success: false,
                 error: 'Ошибка при проверке токена'
             });
@@ -231,7 +221,7 @@ app.post('/api/verify-deletion', async (req, res) => {
         console.error('Verification error:', error);
         res.status(500).json({
             success: false,
-            error: 'Ошибка верификации: ' + error.message
+            error: 'Внутренняя ошибка сервера'
         });
     }
 });
