@@ -176,19 +176,16 @@ app.post('/api/verify-deletion', async (req, res) => {
         }
 
         try {
-            // Проверяем существование токена в Firestore
-            const tokenDoc = await db.collection('verification_tokens')
-                .doc(uid)
-                .get();
+            // Проверяем существование токена в Realtime Database
+            const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
+            const tokenData = tokenSnapshot.val();
 
-            if (!tokenDoc.exists) {
+            if (!tokenData) {
                 return res.status(400).json({
                     success: false,
                     error: 'Недействительный токен верификации'
                 });
             }
-
-            const tokenData = tokenDoc.data();
 
             if (tokenData.token !== token) {
                 return res.status(400).json({
@@ -197,9 +194,9 @@ app.post('/api/verify-deletion', async (req, res) => {
                 });
             }
 
-            // Получаем данные пользователя из Firestore
-            const userDoc = await db.collection('users').doc(uid).get();
-            const userData = userDoc.exists ? userDoc.data() : null;
+            // Получаем данные пользователя из Realtime Database
+            const userSnapshot = await db.ref(`users/${uid}`).once('value');
+            const userData = userSnapshot.val();
 
             res.json({
                 success: true,
@@ -214,7 +211,6 @@ app.post('/api/verify-deletion', async (req, res) => {
                 error: 'Ошибка при проверке токена'
             });
         }
-
     } catch (error) {
         console.error('Verification error:', error);
         res.status(500).json({
@@ -230,31 +226,27 @@ app.post('/api/confirm-deletion', async (req, res) => {
         const { token, uid } = req.body;
 
         // Проверяем токен еще раз
-        const tokenDoc = await db.collection('verification_tokens')
-            .doc(uid)
-            .get();
+        const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
+        const tokenData = tokenSnapshot.val();
 
-        if (!tokenDoc.exists || tokenDoc.data().status !== 'pending') {
+        if (!tokenData || tokenData.status !== 'pending') {
             return res.status(400).json({
                 success: false,
                 error: 'Недействительный токен'
             });
         }
 
-        // Начинаем транзакцию для атомарного обновления
-        await db.runTransaction(async (transaction) => {
-            // Обновляем статус токена
-            transaction.update(tokenDoc.ref, { status: 'completed' });
+        // Обновляем статус токена и создаем запись об удалении
+        const updates = {};
+        updates[`verification_tokens/${uid}/status`] = 'completed';
+        updates[`deletion_requests/${uid}`] = {
+            user_id: uid,
+            requested_at: new Date().toISOString(),
+            status: 'pending',
+            token: token
+        };
 
-            // Создаем запись о запросе на удаление
-            const deletionRef = db.collection('deletion_requests').doc(uid);
-            transaction.set(deletionRef, {
-                user_id: uid,
-                requested_at: admin.firestore.FieldValue.serverTimestamp(),
-                status: 'pending',
-                token: token
-            });
-        });
+        await db.ref().update(updates);
 
         // Отправляем уведомление в Telegram через бота
         const bot_token = '7623000540:AAHNX-KCHWXq6XIV54ruYlDAWKydvtsUc3g';
@@ -262,7 +254,6 @@ app.post('/api/confirm-deletion', async (req, res) => {
             chat_id: uid,
             text: "✅ Удаление данных подтверждено.\nВаши данные будут удалены в течение 24 часов."
         });
-
 
         res.json({ success: true });
 
