@@ -165,19 +165,14 @@ app.get('/verify', (req, res) => {
 // Эндпоинт для верификации токена удаления
 app.post('/api/verify-deletion', async (req, res) => {
     try {
-        const { token, uid, userData } = req.body;
+        const { token, uid } = req.body;
 
-        if (!token || !uid || !userData) {
+        if (!token || !uid) {
             return res.status(400).json({
                 success: false,
                 error: 'Отсутствуют необходимые данные'
             });
         }
-
-        // Добавим логирование для отладки
-        console.log('Attempting to verify token:', { token, uid });
-        console.log('Firebase Admin initialized:', !!admin.apps.length);
-        console.log('Firestore instance:', !!db);
 
         try {
             // Проверяем существование токена в Firebase
@@ -193,7 +188,6 @@ app.post('/api/verify-deletion', async (req, res) => {
             }
 
             const tokenData = tokenDoc.data();
-            console.log('Token data from Firestore:', tokenData);
 
             // Проверяем соответствие токена
             if (tokenData.token !== token) {
@@ -203,10 +197,15 @@ app.post('/api/verify-deletion', async (req, res) => {
                 });
             }
 
-            // Отправляем успешный ответ
+            // Получаем данные пользователя
+            const userDoc = await db.collection('users').doc(uid).get();
+            const userData = userDoc.exists ? userDoc.data() : null;
+
+            // Отправляем успешный ответ с данными пользователя
             res.json({
                 success: true,
-                message: 'Токен верифицирован успешно'
+                message: 'Токен верифицирован успешно',
+                userData: userData
             });
 
         } catch (firestoreError) {
