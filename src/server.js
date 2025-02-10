@@ -206,7 +206,12 @@ app.post('/api/verify-deletion', async (req, res) => {
         });
     }
 });
+
+app.get('/deletionconfirmed', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'deletionconfirmed.html'));
+});
 // Эндпоинт для подтверждения удаления
+
 app.post('/api/confirm-deletion', async (req, res) => {
     try {
         const { token, uid } = req.body;
