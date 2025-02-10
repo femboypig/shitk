@@ -176,16 +176,19 @@ app.post('/api/verify-deletion', async (req, res) => {
         }
 
         try {
-            // Проверяем существование токена в Realtime Database
-            const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
-            const tokenData = tokenSnapshot.val();
+            // Проверяем существование токена в Firestore
+            const tokenDoc = await db.collection('verification_tokens')
+                .doc(uid)
+                .get();
 
-            if (!tokenData) {
+            if (!tokenDoc.exists) {
                 return res.status(400).json({
                     success: false,
                     error: 'Недействительный токен верификации'
                 });
             }
+
+            const tokenData = tokenDoc.data();
 
             if (tokenData.token !== token) {
                 return res.status(400).json({
@@ -194,9 +197,9 @@ app.post('/api/verify-deletion', async (req, res) => {
                 });
             }
 
-            // Получаем данные пользователя
-            const userSnapshot = await db.ref(`users/${uid}`).once('value');
-            const userData = userSnapshot.val();
+            // Получаем данные пользователя из Firestore
+            const userDoc = await db.collection('users').doc(uid).get();
+            const userData = userDoc.exists ? userDoc.data() : null;
 
             res.json({
                 success: true,
