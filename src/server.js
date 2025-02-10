@@ -27,6 +27,7 @@ if (!admin.apps.length) {
 }
 
 const db = admin.database();
+const firestore = admin.firestore();
 
 // Initialize express app
 const app = express();
@@ -194,9 +195,9 @@ app.post('/api/verify-deletion', async (req, res) => {
                 });
             }
 
-            // Получаем данные пользователя из Realtime Database
-            const userSnapshot = await db.ref(`users/${uid}`).once('value');
-            const userData = userSnapshot.val();
+            // Получаем данные пользователя из Firestore
+            const userDoc = await firestore.collection('users').doc(uid).get();
+            const userData = userDoc.exists ? userDoc.data() : null;
 
             res.json({
                 success: true,
