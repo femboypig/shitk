@@ -2,6 +2,15 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json');
+
+// Инициализация Firebase Admin
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
 
 // Initialize express app
 const app = express();
@@ -322,3 +331,4 @@ const server = app.listen(port, () => {
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
 }); 
+
