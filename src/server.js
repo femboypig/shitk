@@ -196,13 +196,19 @@ app.post('/api/verify-deletion', async (req, res) => {
             }
 
             // Получаем данные пользователя из Firestore
-            const userDoc = await firestore.collection('users').doc(uid).get();
-            const userData = userDoc.exists ? userDoc.data() : null;
+            const userDoc = await admin.firestore().collection('users').doc(uid).get();
+            
+            if (!userDoc.exists) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Пользователь не найден'
+                });
+            }
 
+            // Возвращаем успех, так как данные пользователя уже есть в localStorage
             res.json({
                 success: true,
-                message: 'Токен верифицирован успешно',
-                userData: userData
+                message: 'Токен верифицирован успешно'
             });
 
         } catch (dbError) {
@@ -220,7 +226,6 @@ app.post('/api/verify-deletion', async (req, res) => {
         });
     }
 });
-
 // Эндпоинт для подтверждения удаления
 app.post('/api/confirm-deletion', async (req, res) => {
     try {
