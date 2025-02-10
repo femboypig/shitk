@@ -38,6 +38,8 @@
 
             try {
                 // Проверяем токен и получаем данные пользователя
+                console.log('Sending verification request for uid:', uid); // Добавляем лог
+                
                 const response = await fetch('/api/verify-deletion', {
                     method: 'POST',
                     headers: {
@@ -47,8 +49,14 @@
                 });
 
                 const data = await response.json();
+                console.log('Server response:', data); // Добавляем лог
+
                 if (!response.ok) {
                     throw new Error(data.error || 'Ошибка верификации');
+                }
+
+                if (!data.user) {
+                    throw new Error('Данные пользователя отсутствуют в ответе сервера');
                 }
 
                 // Отображаем данные и форму подтверждения
@@ -56,14 +64,17 @@
                 document.getElementById('content').style.display = 'block';
                 
                 const userData = data.user;
+                console.log('User data to display:', userData); // Добавляем лог
+
                 document.querySelector('.user-info').innerHTML = `
-                    <p><strong>Пользователь:</strong> ${userData.first_name || ''} ${userData.last_name || ''}</p>
-                    <p><strong>VK ID:</strong> ${userData.vk_id || ''}</p>
-                    <p><strong>ID:</strong> ${userData.uid || ''}</p>
+                    <p><strong>Пользователь:</strong> ${userData.first_name || 'Н/Д'} ${userData.last_name || 'Н/Д'}</p>
+                    <p><strong>VK ID:</strong> ${userData.vk_id || 'Н/Д'}</p>
+                    <p><strong>ID:</strong> ${userData.uid || 'Н/Д'}</p>
                 `;
 
                 setupConfirmButton(token, uid);
             } catch (error) {
+                console.error('Error in verification process:', error); // Добавляем лог
                 showError(error.message);
             }
         });

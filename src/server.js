@@ -176,38 +176,59 @@ app.post('/api/verify-deletion', async (req, res) => {
             });
         }
 
-        // Проверяем существование токена в Realtime Database
-        const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
-        const tokenData = tokenSnapshot.val();
+        try {
+            // Проверяем существование токена в Realtime Database
+            const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
+            const tokenData = tokenSnapshot.val();
 
-        if (!tokenData || tokenData.token !== token) {
-            return res.status(400).json({
-                success: false,
-                error: 'Недействительный токен верификации'
+            if (!tokenData || tokenData.token !== token) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Недействительный токен верификации'
+                });
+            }
+
+            // Получаем данные пользователя из Firestore
+            const userDoc = await admin.firestore().collection('users').doc(uid).get();
+            
+            if (!userDoc.exists) {
+                console.log('User not found in Firestore:', uid); // Добавляем лог
+                return res.status(404).json({
+                    success: false,
+                    error: 'Пользователь не найден'
+                });
+            }
+
+            const userData = userDoc.data();
+            console.log('User data from Firestore:', userData); // Добавляем лог
+
+            // Проверяем наличие необходимых полей
+            if (!userData || !userData.first_name || !userData.vk_id) {
+                console.log('Invalid user data:', userData); // Добавляем лог
+                return res.status(400).json({
+                    success: false,
+                    error: 'Некорректные данные пользователя'
+                });
+            }
+
+            // Возвращаем данные пользователя вместе с подтверждением
+            res.json({
+                success: true,
+                message: 'Токен верифицирован успешно',
+                user: {
+                    ...userData,
+                    uid: uid // Явно добавляем uid в ответ
+                }
             });
+        } catch (error) {
+            console.error('Database error:', error); // Добавляем лог
+            throw error;
         }
-
-        // Получаем данные пользователя из Firestore
-        const userDoc = await admin.firestore().collection('users').doc(uid).get();
-        
-        if (!userDoc.exists) {
-            return res.status(404).json({
-                success: false,
-                error: 'Пользователь не найден'
-            });
-        }
-
-        // Возвращаем данные пользователя вместе с подтверждением
-        res.json({
-            success: true,
-            message: 'Токен верифицирован успешно',
-            user: userDoc.data()
-        });
     } catch (error) {
         console.error('Error verifying deletion token:', error);
         res.status(500).json({
             success: false,
-            error: 'Ошибка при проверке токена'
+            error: 'Ошибка при проверке токена: ' + error.message
         });
     }
 });
