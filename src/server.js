@@ -4,21 +4,26 @@ const cors = require('cors');
 const axios = require('axios');
 const admin = require('firebase-admin');
 
-// Initialize Firebase Admin with credentials
-let serviceAccount;
-try {
-    // For local development
-    serviceAccount = require('./serviceAccountKey.json');
-} catch (error) {
-    // For production (Vercel)
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-}
+// Firebase Admin SDK configuration
+const serviceAccount = {
+    type: "service_account",
+    project_id: "shitk-p",
+    private_key_id: "aa7456f7c9871057118a0ddf060f74bcab433452",
+    private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDFWKYtm08Yxwbc\nk3YQv9EgXWCvKx0vlAwHjh2nvJj+1bCyCd51jeWXam/P3KY1e7VTgKfrEGG7WS4g\nCU8BExoEVaQMMekumJd/1EJQCB6mlALk+aSXU5agugcCxfyxFORXPh0kwcjfMh+E\nHyfM61a4k2G8Qd/vDnUPsL7wr+jaVgJZCU0IWhuI+0cfJBVC6zktSWT7pRqd9e6X\nWpxYhU/uEFkYGYEM+fK+lU3YO1OkukW3d7K/eLuvQKIw1ABSB7WPCbgasMj4qru8\n8SRW/Kev744HPftqdmwEV/Iw4VB0lrxiMzmZd+buQCkAwETWItyp4QTqS+RUtpAk\nkJYN9W/JAgMBAAECggEAIKCHRPCxqJE14gpNPE1XqBKtdU3a/ZlBTeR3TwVK2Y2p\n23LvQR83JLatCsAvs0BN2ng3CubX9E9furM0nnhdK6H0b9cL9toKk3tGhWXPmiR2\nwArtZTQlf1LnmClJ8wWsZNIjo7FC4nKD1xEG6wXDqNt7uVITfGS3AjjrW0QHau//\n1ATSLwTZSojA+Te8ys7Z0kKtqsMvfgTBEd7HzZBHPCISWPBkaz27d4TrqzXIn/wD\ng77OrgCuTZCPQbDYlRquOjYveIqohXbfP46R/zz0uXNUNvOhfV2RI4USKFhAweIo\ncWbxuDyh2ATZTRTE+9iwcxrUkdKE5XuWAdIM2d1lqwKBgQDzhdSaVoQ6oBUowy9L\nJt7p8ppqbveTn2SiumEuIAoiw5q3yIideboRK0H+POHee1YavxiozT+hYPEd80AT\nHfkzvS4fx/BMrE9lW2oqnbBTcK012Z3vNO/Rrq6Pt88CX3kuVaFxKkEc7DzLplLU\ntbYWZupCGPkQFmOy3HRwkNJiJwKBgQDPdSTnFj2Xvo4Cnz6EP4EqGN2gpqu3wVdB\nTZI9j6BnuRRFxMTO5w3Ws4QAVP1zd04ewsczAZFokVXLL5GUwPbmas7I9SC1QGt/\nPsHB8xEU+Az9xYmDWN/BI7i11oqHBRAkle0mEynnGMLcJeA+LUsgezhzfLfJ+kJi\ni/f3QtgEjwKBgQDUYW9dev6vMlXByxg/7pKSbeaF1GlO8cAOu4VteLvePcF9bwLW\ndAb2WkeftvE121Lo2Khk7zwDPkyK1k6XXZisqtzDEthbxhsoRmV87TGOU8J8KGI4\n8G4G7NWIucFsTF+fLUczLqrC0rTi1xd+M0uulerP4n+0rBIfN2zFj0gsGQKBgQDL\ntAvzOJxsBrjsjC7Xrn+GtXnRSDburNKflaqV9hScJFhqlWZmfuvQuN5RcSKZITm8\n7KaqR8zer25dn6zEMqF86L15B3EBaGrlO9sHNUO9oj8nY7K+HSNAQ3IYYrwNDgSm\n1+xPaZvIhkC36B0DEHhnQXbRt1HD6o8KssNdr+3qswKBgDm+VdEsNRVNEUmFgTfB\nIw1tUVPzbeghLuk0Ou6/wInQE5rLQPwqx9IR37o/KJlwYPLtii2AyvVReX7znx6e\n40ODTsDxCZX4q1kzOfeO3lL0hcwz2jlknS70Ocvechg2lg9hRnD1VFW5WAqK1rT5\ns66twzOXlrR3W4PF3eRpC2hC\n-----END PRIVATE KEY-----\n",
+    client_email: "firebase-adminsdk-fbsvc@shitk-p.iam.gserviceaccount.com",
+    client_id: "109874227719706049138",
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40shitk-p.iam.gserviceaccount.com"
+};
 
-// Инициализация Firebase Admin SDK
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://shitk-p-default-rtdb.firebaseio.com/"
-});
+// Initialize Firebase Admin SDK
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+    });
+}
 
 const db = admin.firestore();
 
