@@ -143,6 +143,13 @@ app.post('/api/verify-deletion', async (req, res) => {
     try {
         const { token, uid, userData } = req.body;
 
+        if (!token || !uid || !userData) {
+            return res.status(400).json({
+                success: false,
+                error: 'Отсутствуют необходимые данные'
+            });
+        }
+
         // Проверяем существование токена в Firebase
         const tokenDoc = await db.collection('verification_tokens')
             .doc(uid)
@@ -157,8 +164,20 @@ app.post('/api/verify-deletion', async (req, res) => {
 
         const tokenData = tokenDoc.data();
 
+        // Проверяем соответствие токена
+        if (tokenData.token !== token) {
+            return res.status(400).json({
+                success: false,
+                error: 'Неверный токен верификации'
+            });
+        }
+
         // Проверяем срок действия токена (30 минут)
-        const tokenAge = Date.now() - tokenData.created_at.toDate().getTime();
+        const tokenTimestamp = tokenData.created_at.toDate ? 
+            tokenData.created_at.toDate() : 
+            new Date(tokenData.created_at);
+            
+        const tokenAge = Date.now() - tokenTimestamp.getTime();
         if (tokenAge > 30 * 60 * 1000) {
             await tokenDoc.ref.delete();
             return res.status(400).json({
@@ -175,25 +194,33 @@ app.post('/api/verify-deletion', async (req, res) => {
             });
         }
 
-        // Проверяем соответствие данных пользователя
-        const userDoc = await db.collection('users')
-            .doc(uid)
-            .get();
-
-        if (!userDoc.exists) {
-            return res.status(404).json({
+        // Проверяем существование пользователя в VK
+        try {
+            const vkUserData = await getVKUserInfo(userData.vk_id);
+            if (!vkUserData) {
+                throw new Error('Пользователь VK не найден');
+            }
+        } catch (error) {
+            return res.status(400).json({
                 success: false,
-                error: 'Пользователь не найден'
+                error: 'Ошибка верификации пользователя VK'
             });
         }
 
-        res.json({ success: true });
+        res.json({ 
+            success: true,
+            userData: {
+                first_name: userData.first_name,
+                last_name: userData.last_name,
+                vk_id: userData.vk_id
+            }
+        });
 
     } catch (error) {
         console.error('Verification error:', error);
         res.status(500).json({
             success: false,
-            error: 'Ошибка верификации'
+            error: 'Ошибка верификации: ' + error.message
         });
     }
 });
