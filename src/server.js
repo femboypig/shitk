@@ -188,40 +188,14 @@ app.post('/api/verify-deletion', async (req, res) => {
                 });
             }
 
-            // Получаем данные пользователя из Firestore
-            const userDoc = await admin.firestore().collection('users').doc(uid).get();
-            
-            if (!userDoc.exists) {
-                console.log('User not found in Firestore:', uid); // Добавляем лог
-                return res.status(404).json({
-                    success: false,
-                    error: 'Пользователь не найден'
-                });
-            }
-
-            const userData = userDoc.data();
-            console.log('User data from Firestore:', userData); // Добавляем лог
-
-            // Проверяем наличие необходимых полей
-            if (!userData || !userData.first_name || !userData.vk_id) {
-                console.log('Invalid user data:', userData); // Добавляем лог
-                return res.status(400).json({
-                    success: false,
-                    error: 'Некорректные данные пользователя'
-                });
-            }
-
-            // Возвращаем данные пользователя вместе с подтверждением
+            // Токен валиден, возвращаем успех
             res.json({
                 success: true,
-                message: 'Токен верифицирован успешно',
-                user: {
-                    ...userData,
-                    uid: uid // Явно добавляем uid в ответ
-                }
+                message: 'Токен верифицирован успешно'
             });
+
         } catch (error) {
-            console.error('Database error:', error); // Добавляем лог
+            console.error('Database error:', error);
             throw error;
         }
     } catch (error) {
