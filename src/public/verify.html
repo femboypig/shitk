@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-    <!-- Initialize Firebase -->
+    <!-- Firebase config -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD0ksObwMb6BBZN3WQBYDTLEKNHdG3fr3U",
@@ -22,40 +22,36 @@
             messagingSenderId: "860946224153",
             appId: "1:860946224153:web:cc1d2b7df27e434f9e0688"
         };
-
         firebase.initializeApp(firebaseConfig);
     </script>
 
     <script>
-        // Единая проверка авторизации
         window.addEventListener('DOMContentLoaded', () => {
-            const vkUser = localStorage.getItem('vk_user');
-            const isLogged = localStorage.getItem('logged') === 'true';
-
-            if (!vkUser || !isLogged) {
-                localStorage.setItem('redirect_after_login', window.location.href);
-                window.location.href = '/';
-                return;
-            }
-
-            const userData = JSON.parse(vkUser);
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
-            
-            if (userData.uid !== urlParams.get('uid')) {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').innerHTML = `
-                    <div class="error-message">
-                        Ошибка: токен не соответствует текущему пользователю
-                    </div>
-                `;
+            const uid = urlParams.get('uid');
+
+            if (!token || !uid) {
+                showError('Отсутствуют необходимые параметры');
                 return;
             }
 
-            verifyDeletion(token, userData.uid);
+            // Получаем данные пользователя из Firestore
+            const firestore = firebase.firestore();
+            firestore.collection('users').doc(uid).get()
+                .then(doc => {
+                    if (!doc.exists) {
+                        throw new Error('Пользователь не найден');
+                    }
+                    const userData = doc.data();
+                    verifyDeletion(token, uid, userData);
+                })
+                .catch(error => {
+                    showError(error.message);
+                });
         });
 
-        async function verifyDeletion(token, uid) {
+        async function verifyDeletion(token, uid, userData) {
             try {
                 const response = await fetch('/api/verify-deletion', {
                     method: 'POST',
@@ -73,8 +69,7 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 
-                // Отображаем данные из localStorage вместо полученных с сервера
-                const userData = JSON.parse(localStorage.getItem('vk_user'));
+                // Отображаем данные из Firestore
                 document.querySelector('.user-info').innerHTML = `
                     <p><strong>Пользователь:</strong> ${userData.first_name} ${userData.last_name}</p>
                     <p><strong>VK ID:</strong> ${userData.vk_id}</p>
@@ -83,13 +78,18 @@
 
                 setupConfirmButton(token, uid);
             } catch (error) {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').innerHTML = `
-                    <div class="error-message">
-                        ${error.message}
-                    </div>
-                `;
+                showError(error.message);
             }
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').innerHTML = `
+                <div class="error-message">
+                    ${message}
+                </div>
+            `;
         }
 
         function setupConfirmButton(token, uid) {
@@ -121,12 +121,7 @@
                             window.location.href = '/deletion-confirmed';
                         }
                     } catch (error) {
-                        document.getElementById('error').style.display = 'block';
-                        document.getElementById('error').innerHTML = `
-                            <div class="error-message">
-                                ${error.message}
-                            </div>
-                        `;
+                        showError(error.message);
                         confirmButton.disabled = false;
                         confirmButton.textContent = 'Подтвердить удаление';
                     }
