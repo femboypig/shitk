@@ -176,53 +176,38 @@ app.post('/api/verify-deletion', async (req, res) => {
             });
         }
 
-        try {
-            // Проверяем существование токена в Realtime Database
-            const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
-            const tokenData = tokenSnapshot.val();
+        // Проверяем существование токена в Realtime Database
+        const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
+        const tokenData = tokenSnapshot.val();
 
-            if (!tokenData) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Недействительный токен верификации'
-                });
-            }
-
-            if (tokenData.token !== token) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Неверный токен верификации'
-                });
-            }
-
-            // Получаем данные пользователя из Firestore
-            const userDoc = await admin.firestore().collection('users').doc(uid).get();
-            
-            if (!userDoc.exists) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'Пользователь не найден'
-                });
-            }
-
-            // Возвращаем успех, так как данные пользователя уже есть в localStorage
-            res.json({
-                success: true,
-                message: 'Токен верифицирован успешно'
-            });
-
-        } catch (dbError) {
-            console.error('Database operation error:', dbError);
-            res.status(500).json({
+        if (!tokenData || tokenData.token !== token) {
+            return res.status(400).json({
                 success: false,
-                error: 'Ошибка при проверке токена'
+                error: 'Недействительный токен верификации'
             });
         }
+
+        // Получаем данные пользователя из Firestore
+        const userDoc = await admin.firestore().collection('users').doc(uid).get();
+        
+        if (!userDoc.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Пользователь не найден'
+            });
+        }
+
+        // Возвращаем данные пользователя вместе с подтверждением
+        res.json({
+            success: true,
+            message: 'Токен верифицирован успешно',
+            user: userDoc.data()
+        });
     } catch (error) {
-        console.error('Verification error:', error);
+        console.error('Error verifying deletion token:', error);
         res.status(500).json({
             success: false,
-            error: 'Внутренняя ошибка сервера'
+            error: 'Ошибка при проверке токена'
         });
     }
 });
