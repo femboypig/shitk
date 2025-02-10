@@ -9,7 +9,8 @@ if (!process.env.FIREBASE_PRIVATE_KEY) {
     // Если переменной нет, используем локальный файл
     const serviceAccount = require('./serviceAccountKey.json');
     admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://shitk-p-default-rtdb.firebaseio.com"
     });
 } else {
     // Используем переменную окружения
@@ -25,11 +26,12 @@ if (!process.env.FIREBASE_PRIVATE_KEY) {
             "token_uri": "https://oauth2.googleapis.com/token",
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
             "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40shitk-p.iam.gserviceaccount.com"
-        })
+        }),
+        databaseURL: "https://shitk-p-default-rtdb.firebaseio.com"
     });
 }
 
-// Инициализируем Firestore
+// Инициализируем Firestore сразу после инициализации админа
 const db = admin.firestore();
 
 // Initialize express app
