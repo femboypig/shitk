@@ -158,12 +158,16 @@
                 const updatedUserData = {
                     ...existingData,
                     uid: existingUser.id,
-                    vk_id: String(userData.user_id),
-                    user_id: userData.user_id // Сохраняем оригинальный user_id
+                    user_id: userData.user_id // Сохраняем VK user_id
                 };
                 localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
                 localStorage.setItem('logged', 'true');
                 return updatedUserData;
+            }
+
+            // Если user_id не определен, выбрасываем ошибку
+            if (!userData.user_id) {
+                throw new Error('User ID is undefined');
             }
 
             // Создаем нового пользователя
@@ -172,7 +176,7 @@
             
             const userDataToSave = {
                 vk_id: String(userData.user_id),
-                user_id: userData.user_id, // Сохраняем оригинальный user_id
+                user_id: userData.user_id,
                 first_name: userData.first_name || '',
                 last_name: userData.last_name || '',
                 email: userData.email || '',
@@ -182,14 +186,21 @@
                 last_login: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            await userRef.set(userDataToSave, { merge: true });
+            // Проверяем все поля перед сохранением
+            Object.keys(userDataToSave).forEach(key => {
+                if (userDataToSave[key] === undefined) {
+                    console.error(`Field ${key} is undefined`);
+                }
+            });
+
+            await userRef.set(userDataToSave);
 
             // Сохраняем в localStorage
             const updatedUserData = { ...userDataToSave, uid: uniqueId };
             localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
             localStorage.setItem('logged', 'true');
             
-            console.log('User data saved to Firestore');
+            console.log('User data saved to Firestore:', updatedUserData);
             return updatedUserData;
         }
     </script>
