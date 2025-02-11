@@ -216,7 +216,7 @@ app.post('/api/confirm-deletion', async (req, res) => {
     try {
         const { token, uid } = req.body;
 
-        // Проверяем токен еще раз
+        // Проверяем токен
         const tokenSnapshot = await db.ref(`verification_tokens/${uid}`).once('value');
         const tokenData = tokenSnapshot.val();
 
@@ -227,32 +227,27 @@ app.post('/api/confirm-deletion', async (req, res) => {
             });
         }
 
-        // Обновляем статус токена и создаем запись об удалении
-        const updates = {};
-        updates[`verification_tokens/${uid}/status`] = 'completed';
-        updates[`deletion_requests/${uid}`] = {
-            user_id: uid,
-            requested_at: new Date().toISOString(),
-            status: 'pending',
-            token: token
-        };
+        // Немедленно удаляем данные пользователя из Firestore
+        const userRef = admin.firestore().collection('users').doc(uid);
+        await userRef.delete();
 
-        await db.ref().update(updates);
+        // Удаляем токен верификации
+        await db.ref(`verification_tokens/${uid}`).remove();
 
-        // Отправляем уведомление в Telegram через бота
+        // Отправляем уведомление в Telegram
         const bot_token = '7623000540:AAHNX-KCHWXq6XIV54ruYlDAWKydvtsUc3g';
         await axios.post(`https://api.telegram.org/bot${bot_token}/sendMessage`, {
             chat_id: uid,
-            text: "✅ Удаление данных подтверждено.\nВаши данные будут удалены в течение 24 часов."
+            text: "✅ Ваши данные были успешно удалены из системы."
         });
 
         res.json({ success: true });
 
     } catch (error) {
-        console.error('Confirmation error:', error);
+        console.error('Deletion error:', error);
         res.status(500).json({
             success: false,
-            error: 'Ошибка подтверждения'
+            error: 'Ошибка удаления аккаунта'
         });
     }
 });
