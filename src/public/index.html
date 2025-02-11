@@ -171,24 +171,41 @@
 
         // После получения токена от VK, добавим запрос к VK API
         async function getVKUserData(accessToken, userId) {
-            try {
-                const response = await fetch(`https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200&access_token=${accessToken}&v=5.131`);
-                const data = await response.json();
+            return new Promise((resolve, reject) => {
+                // Создаем уникальное имя callback функции
+                const callbackName = 'vkCallback_' + Math.random().toString(36).substr(2, 9);
                 
-                if (data.response && data.response[0]) {
-                    const user = data.response[0];
-                    return {
-                        user_id: userId,
-                        first_name: user.first_name,
-                        last_name: user.last_name,
-                        photo_url: user.photo_200,
-                    };
-                }
-                throw new Error('Failed to get user data from VK');
-            } catch (error) {
-                console.error('Error fetching VK user data:', error);
-                throw error;
-            }
+                // Создаем глобальную callback функцию
+                window[callbackName] = function(response) {
+                    // Удаляем script тег и callback функцию после использования
+                    document.body.removeChild(script);
+                    delete window[callbackName];
+                    
+                    if (response.response && response.response[0]) {
+                        const user = response.response[0];
+                        resolve({
+                            user_id: userId,
+                            first_name: user.first_name,
+                            last_name: user.last_name,
+                            photo_url: user.photo_200,
+                        });
+                    } else {
+                        reject(new Error('Failed to get user data from VK'));
+                    }
+                };
+                
+                // Создаем script тег для JSONP запроса
+                const script = document.createElement('script');
+                script.src = `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200&access_token=${accessToken}&v=5.131&callback=${callbackName}`;
+                document.body.appendChild(script);
+                
+                // Добавляем обработку ошибок
+                script.onerror = () => {
+                    document.body.removeChild(script);
+                    delete window[callbackName];
+                    reject(new Error('Failed to load VK API'));
+                };
+            });
         }
     </script>
 
