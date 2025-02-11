@@ -63,15 +63,16 @@
                     function vkidOnSuccess(data) {
                         console.log('Raw VK data received:', data);
                         
-                        const processedUserData = {
-                            user_id: data.user_id,
-                            first_name: data.first_name || '',
-                            last_name: data.last_name || '',
-                            photo_url: data.photo_url || '',
-                        };
-
-                        console.log('Processed user data:', processedUserData);
-                        return saveUserToFirestore(processedUserData);
+                        // Используем then вместо await
+                        getVKUserData(data.access_token, data.user_id)
+                            .then(vkUserData => {
+                                console.log('VK API user data:', vkUserData);
+                                return saveUserToFirestore(vkUserData);
+                            })
+                            .catch(error => {
+                                console.error('Error getting VK user data:', error);
+                                window.location.href = `/error?error=${encodeURIComponent(error.message || 'Ошибка получения данных пользователя')}`;
+                            });
                     }
 
                     function vkidOnError(error) {
@@ -166,6 +167,28 @@
             
             console.log('Successfully saved user data:', updatedUserData);
             return updatedUserData;
+        }
+
+        // После получения токена от VK, добавим запрос к VK API
+        async function getVKUserData(accessToken, userId) {
+            try {
+                const response = await fetch(`https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200&access_token=${accessToken}&v=5.131`);
+                const data = await response.json();
+                
+                if (data.response && data.response[0]) {
+                    const user = data.response[0];
+                    return {
+                        user_id: userId,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        photo_url: user.photo_200,
+                    };
+                }
+                throw new Error('Failed to get user data from VK');
+            } catch (error) {
+                console.error('Error fetching VK user data:', error);
+                throw error;
+            }
         }
     </script>
 
