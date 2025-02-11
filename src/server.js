@@ -227,8 +227,25 @@ app.post('/api/confirm-deletion', async (req, res) => {
             });
         }
 
-        // Немедленно удаляем данные пользователя из Firestore
+        // Получаем данные пользователя перед удалением
         const userRef = admin.firestore().collection('users').doc(uid);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            return res.status(404).json({
+                success: false,
+                error: 'Пользователь не найден'
+            });
+        }
+
+        // Создаем бэкап данных
+        const backupRef = admin.firestore().collection('backups').doc(uid);
+        await backupRef.set({
+            userData: userDoc.data(),
+            deletedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Удаляем данные пользователя
         await userRef.delete();
 
         // Удаляем токен верификации

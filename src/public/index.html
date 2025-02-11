@@ -138,19 +138,41 @@
             });
         }
 
-        function saveUserToFirestore(userData) {
-            if (!userData) {
-                console.error('Invalid user data:', userData);
-                return Promise.reject(new Error('Invalid user data'));
+        async function saveUserToFirestore(userData) {
+            const firestore = firebase.firestore();
+            
+            // Проверяем существует ли пользователь с таким vk_id
+            const userQuery = await firestore.collection('users')
+                .where('vk_id', '==', String(userData.user_id))
+                .get();
+
+            if (!userQuery.empty) {
+                // Пользователь существует, обновляем last_login
+                const existingUser = userQuery.docs[0];
+                await existingUser.ref.update({
+                    last_login: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Сохраняем в localStorage с существующими данными
+                const existingData = existingUser.data();
+                const updatedUserData = {
+                    ...existingData,
+                    uid: existingUser.id,
+                    vk_id: String(userData.user_id),
+                    user_id: userData.user_id // Сохраняем оригинальный user_id
+                };
+                localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
+                localStorage.setItem('logged', 'true');
+                return updatedUserData;
             }
 
-            const firestore = firebase.firestore();
-            const uniqueId = generateUUID();
+            // Создаем нового пользователя
+            const uniqueId = String(userData.user_id);
             const userRef = firestore.collection('users').doc(uniqueId);
-
+            
             const userDataToSave = {
-                uid: uniqueId,
-                vk_id: String(userData.user_id || ''),
+                vk_id: String(userData.user_id),
+                user_id: userData.user_id, // Сохраняем оригинальный user_id
                 first_name: userData.first_name || '',
                 last_name: userData.last_name || '',
                 email: userData.email || '',
@@ -160,18 +182,15 @@
                 last_login: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            return userRef.set(userDataToSave, { merge: true })
-                .then(() => {
-                    // Сохраняем uid в localStorage вместе с остальными данными пользователя
-                    const updatedUserData = { ...userData, uid: uniqueId };
-                    localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
-                    console.log('User data saved to Firestore');
-                    return updatedUserData;
-                })
-                .catch(error => {
-                    console.error('Error saving user to Firestore:', error);
-                    throw error;
-                });
+            await userRef.set(userDataToSave, { merge: true });
+
+            // Сохраняем в localStorage
+            const updatedUserData = { ...userDataToSave, uid: uniqueId };
+            localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
+            localStorage.setItem('logged', 'true');
+            
+            console.log('User data saved to Firestore');
+            return updatedUserData;
         }
     </script>
 
