@@ -13,35 +13,37 @@
 
     <style>
         .verification-container {
-            max-width: 500px;
+            text-align: center;
+            max-width: 480px;
+            padding: 40px 24px;
             margin: 50px auto;
-            padding: 2rem;
-            background: #ffffff;
+            background: #1A1A1A;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
-            color: #333;
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
+            color: #fff;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 24px;
         }
 
         .user-info {
-            background: #f8f9fa;
+            background: #2A2A2A;
             padding: 1.5rem;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 1.5rem;
+            text-align: left;
         }
 
         .user-info p {
             margin: 0.5rem 0;
-            color: #495057;
+            color: #999;
         }
 
         .user-info strong {
-            color: #212529;
+            color: #fff;
         }
 
         #verification-form {
@@ -52,57 +54,63 @@
 
         .confirm-input {
             padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 6px;
+            border: 2px solid #333;
+            border-radius: 12px;
             font-size: 1rem;
+            background: #2A2A2A;
+            color: #fff;
             transition: border-color 0.2s;
         }
 
         .confirm-input:focus {
-            border-color: #ff4444;
+            border-color: #FF3B30;
             outline: none;
         }
 
         .danger-button {
-            background: #ff4444;
+            background: #FF3B30;
             color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
             border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 1rem;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
 
         .danger-button:disabled {
-            background: #ffa0a0;
+            background: #662222;
             cursor: not-allowed;
         }
 
         .danger-button:hover:not(:disabled) {
-            background: #ff0000;
+            background: #FF2419;
+            transform: translateY(-2px);
         }
 
         .secondary-button {
-            background: #6c757d;
+            background: #333;
             color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
             border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 1rem;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
 
         .secondary-button:hover {
-            background: #5a6268;
+            background: #444;
+            transform: translateY(-2px);
         }
 
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff4444;
+            border: 4px solid #333;
+            border-top: 4px solid #FF3B30;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 20px auto;
@@ -114,17 +122,18 @@
         }
 
         .error-message {
-            background: #fff3f3;
-            color: #dc3545;
+            background: #2A2A2A;
+            color: #FF3B30;
             padding: 1rem;
-            border-radius: 6px;
-            border-left: 4px solid #dc3545;
+            border-radius: 12px;
+            border-left: 4px solid #FF3B30;
             margin-top: 1rem;
+            text-align: left;
         }
 
         #loading {
             text-align: center;
-            color: #6c757d;
+            color: #999;
         }
 
         #loading p {
@@ -252,7 +261,7 @@
         }
     </script>
 </head>
-<body style="background-color: #f8f9fa;">
+<body style="background-color: #000000;">
     <div class="verification-container">
         <h1>Подтверждение удаления данных</h1>
         <div id="loading">
