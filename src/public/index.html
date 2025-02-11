@@ -146,6 +146,7 @@
                 };
                 localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
                 localStorage.setItem('logged', 'true');
+                window.location.href = '/dashboard';
                 return updatedUserData;
             }
 
@@ -170,6 +171,7 @@
             localStorage.setItem('logged', 'true');
             
             console.log('Successfully saved user data:', updatedUserData);
+            window.location.href = '/dashboard';
             return updatedUserData;
         }
 
