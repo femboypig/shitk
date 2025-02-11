@@ -63,42 +63,15 @@
                     function vkidOnSuccess(data) {
                         console.log('Raw VK data received:', data);
                         
-                        fetch('/auth/vk/login', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                user_id: data.user_id
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Save user data to localStorage
-                                localStorage.setItem('vk_user', JSON.stringify(data.user));
-                                localStorage.setItem('logged', 'true');
-                                
-                                // Save user data to Firestore
-                                return saveUserToFirestore(data.user)
-                                    .then(() => {
-                                        // Проверяем редирект после успешной авторизации
-                                        const redirectPath = localStorage.getItem('redirect_after_login');
-                                        if (redirectPath) {
-                                            localStorage.removeItem('redirect_after_login');
-                                            window.location.href = redirectPath;
-                                        } else {
-                                            window.location.href = '/dashboard';
-                                        }
-                                    });
-                            } else {
-                                throw new Error(data.error || 'Authentication failed');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Auth error:', error);
-                            alert('Ошибка авторизации: ' + error.message);
-                        });
+                        const processedUserData = {
+                            user_id: data.user_id,
+                            first_name: data.first_name || '',
+                            last_name: data.last_name || '',
+                            photo_url: data.photo_url || '',
+                        };
+
+                        console.log('Processed user data:', processedUserData);
+                        return saveUserToFirestore(processedUserData);
                     }
 
                     function vkidOnError(error) {
@@ -139,6 +112,14 @@
         }
 
         async function saveUserToFirestore(userData) {
+            console.log('Received userData:', userData);
+            
+            // Проверяем наличие необходимых данных
+            if (!userData || !userData.user_id) {
+                console.error('Invalid userData:', userData);
+                throw new Error('Invalid user data received');
+            }
+
             const firestore = firebase.firestore();
             
             // Проверяем существует ли пользователь с таким vk_id
@@ -147,30 +128,22 @@
                 .get();
 
             if (!userQuery.empty) {
-                // Пользователь существует, обновляем last_login
                 const existingUser = userQuery.docs[0];
                 await existingUser.ref.update({
                     last_login: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                // Сохраняем в localStorage с существующими данными
                 const existingData = existingUser.data();
                 const updatedUserData = {
                     ...existingData,
                     uid: existingUser.id,
-                    user_id: userData.user_id // Сохраняем VK user_id
+                    user_id: userData.user_id
                 };
                 localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
                 localStorage.setItem('logged', 'true');
                 return updatedUserData;
             }
 
-            // Если user_id не определен, выбрасываем ошибку
-            if (!userData.user_id) {
-                throw new Error('User ID is undefined');
-            }
-
-            // Создаем нового пользователя
             const uniqueId = String(userData.user_id);
             const userRef = firestore.collection('users').doc(uniqueId);
             
@@ -179,28 +152,19 @@
                 user_id: userData.user_id,
                 first_name: userData.first_name || '',
                 last_name: userData.last_name || '',
-                email: userData.email || '',
                 photo_url: userData.photo_url || '',
                 isAdmin: false,
                 created_at: firebase.firestore.FieldValue.serverTimestamp(),
                 last_login: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Проверяем все поля перед сохранением
-            Object.keys(userDataToSave).forEach(key => {
-                if (userDataToSave[key] === undefined) {
-                    console.error(`Field ${key} is undefined`);
-                }
-            });
-
             await userRef.set(userDataToSave);
 
-            // Сохраняем в localStorage
             const updatedUserData = { ...userDataToSave, uid: uniqueId };
             localStorage.setItem('vk_user', JSON.stringify(updatedUserData));
             localStorage.setItem('logged', 'true');
             
-            console.log('User data saved to Firestore:', updatedUserData);
+            console.log('Successfully saved user data:', updatedUserData);
             return updatedUserData;
         }
     </script>
