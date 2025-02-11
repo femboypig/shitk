@@ -104,35 +104,30 @@
 
             confirmButton.addEventListener('click', async () => {
                 if (confirmInput.value === 'УДАЛИТЬ') {
+                try {
                     confirmButton.disabled = true;
                     confirmButton.textContent = 'Удаление...';
-                    
-                    try {
-                        const response = await fetch('/api/confirm-deletion', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ token, uid })
-                        });
 
-                        const result = await response.json();
-                        if (!response.ok) {
-                            throw new Error(result.error || 'Ошибка подтверждения');
-                        }
+                    // Получаем данные пользователя из localStorage
+                    const vkUser = JSON.parse(localStorage.getItem('vk_user') || '{}');
 
-                        if (result.success) {
-                            localStorage.removeItem('vk_user');
-                            localStorage.removeItem('logged');
-                            window.location.href = '/deletionconfirmed';
-                        }
-                    } catch (error) {
-                        showError(error.message);
-                        confirmButton.disabled = false;
-                        confirmButton.textContent = 'Подтвердить удаление';
+                    // Удаляем пользователя из Firestore
+                    const firestore = firebase.firestore();
+                    await firestore.collection('users').doc(String(vkUser.user_id)).delete();
+
+                    // Очищаем localStorage
+                    localStorage.removeItem('vk_user');
+                    localStorage.removeItem('logged');
+
+                    // Перенаправляем на страницу подтверждения удаления
+                    window.location.href = '/deletionconfirmed';
+                } catch (error) {
+                    showError(error.message);
+                    confirmButton.disabled = false;
+                    confirmButton.textContent = 'Подтвердить удаление';
                     }
-                }
-            });
+            }
+        });
         }
     </script>
 </head>
