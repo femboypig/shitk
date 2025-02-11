@@ -6,6 +6,10 @@
     <title>Вход или регистрация</title>
     <link rel="stylesheet" href="/styles.css">
     <script>
+        // Check if user is already logged in
+        if (localStorage.getItem('logged') === 'true' && localStorage.getItem('vk_user')) {
+            window.location.href = '/dashboard';
+        }
     </script>
 
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
